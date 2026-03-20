@@ -3,912 +3,377 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yllx</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <title>Yllx - Web Proxy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --accent:   #6e41ff;
-      --dim:      #4126a5;
-      --bg:       #0d0d12;
-      --row:      #14141e;
-      --tab-bg:   #111119;
-      --tab-on:   #1a1a28;
-      --text:     #dcdaeb;
-      --sub:      #78768f;
-      --bar:      #2d2b46;
-      --on:       #3cc85a;
-      --off:      #c83737;
-      --radius:   10px;
-      --font:     'Nunito', sans-serif;
+      --bg: #0a0e1a;
+      --bg-secondary: #101825;
+      --fg: #ffffff;
+      --muted: #8892a6;
+      --accent: #3b82f6; /* Blue */
+      --accent-hover: #2563eb;
+      --accent-light: #60a5fa;
+      --border: #1e293b;
+      --card: #1e293b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: var(--font);
+      font-family: 'Inter', sans-serif;
       background: var(--bg);
-      color: var(--text);
+      color: var(--fg);
       height: 100vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* ── TOP CHROME ───────────────────────────────────── */
-    .chrome {
+    /* Browser Chrome */
+    .navbar {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 9px 14px;
-      background: var(--row);
-      border-bottom: 1px solid var(--bar);
-      flex-shrink: 0;
-      position: relative;
-      z-index: 50;
+      padding: 10px 16px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      z-index: 100;
     }
 
     .brand {
-      font-weight: 900;
-      font-size: 17px;
+      font-weight: 700;
+      font-size: 20px;
       color: var(--accent);
       letter-spacing: -0.5px;
-      margin-right: 4px;
-      white-space: nowrap;
+      margin-right: 10px;
     }
 
-    .sep {
-      width: 1px;
-      height: 20px;
-      background: var(--bar);
-      flex-shrink: 0;
-    }
-
-    /* nav icon buttons */
     .nav-btn {
-      background: var(--tab-bg);
-      border: 1px solid var(--bar);
-      border-radius: 7px;
-      color: var(--sub);
+      background: none;
+      border: none;
+      color: var(--muted);
       cursor: pointer;
-      width: 32px; height: 32px;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .15s, color .15s, border-color .15s;
-      flex-shrink: 0;
+      padding: 8px;
+      border-radius: 50%;
+      transition: background 0.2s, color 0.2s;
     }
-    .nav-btn:hover   { background: var(--tab-on); color: var(--text); border-color: var(--accent); }
-    .nav-btn:active  { background: var(--dim); }
-    .nav-btn:disabled{ opacity: 0.35; cursor: default; pointer-events: none; }
 
-    /* url bar */
-    .url-wrap {
+    .nav-btn:hover {
+      background: var(--border);
+      color: var(--fg);
+    }
+
+    .url-bar-container {
       flex: 1;
       position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .url-icon {
-      position: absolute;
-      left: 11px;
-      color: var(--sub);
-      pointer-events: none;
-      display: flex;
     }
 
     .url-bar {
       width: 100%;
-      background: var(--tab-bg);
-      border: 1px solid var(--bar);
-      border-radius: 8px;
-      padding: 8px 12px 8px 34px;
-      color: var(--text);
-      font-size: 13px;
-      font-family: var(--font);
-      font-weight: 600;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 10px 20px;
+      color: var(--fg);
+      font-size: 14px;
       outline: none;
-      transition: border-color .15s, background .15s;
+      transition: border-color 0.2s;
     }
-    .url-bar::placeholder { color: var(--sub); font-weight: 500; }
-    .url-bar:focus { border-color: var(--accent); background: var(--row); }
+
+    .url-bar:focus {
+      border-color: var(--accent);
+    }
 
     .go-btn {
       background: var(--accent);
       border: none;
-      padding: 8px 18px;
-      border-radius: 8px;
-      color: #fff;
-      font-weight: 800;
-      font-size: 13px;
-      font-family: var(--font);
+      padding: 10px 24px;
+      border-radius: 24px;
+      color: white;
+      font-weight: 600;
       cursor: pointer;
-      transition: background .15s, transform .1s;
-      flex-shrink: 0;
+      transition: background 0.2s, transform 0.1s;
     }
-    .go-btn:hover  { background: #7d55ff; }
-    .go-btn:active { transform: scale(0.97); background: var(--dim); }
 
-    /* settings cog */
-    .settings-btn {
-      background: var(--tab-bg);
-      border: 1px solid var(--bar);
-      border-radius: 7px;
-      color: var(--sub);
-      cursor: pointer;
-      width: 32px; height: 32px;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .15s, color .15s;
-      flex-shrink: 0;
-    }
-    .settings-btn:hover { background: var(--tab-on); color: var(--text); }
+    .go-btn:hover { background: var(--accent-hover); }
+    .go-btn:active { transform: scale(0.98); }
 
-    /* ── MAIN AREA ────────────────────────────────────── */
-    .main {
+    /* Content Area */
+    .content-area {
       flex: 1;
       position: relative;
-      overflow: hidden;
+      background: #ffffff;
     }
 
     .proxy-frame {
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       border: none;
-      display: none;
-      background: #fff;
     }
 
-    /* ── LOADER ───────────────────────────────────────── */
-    .loader {
-      position: absolute;
-      inset: 0;
-      background: var(--bg);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 14px;
-      z-index: 40;
-    }
-    .loader.show { display: flex; }
-    .spinner {
-      width: 36px; height: 36px;
-      border: 3px solid var(--bar);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-    .loader-text { color: var(--sub); font-size: 13px; font-weight: 600; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── ERROR SCREEN ─────────────────────────────────── */
-    .error-screen {
-      position: absolute;
-      inset: 0;
-      background: var(--bg);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 41;
-      text-align: center;
-      padding: 40px;
-    }
-    .error-screen.show { display: flex; }
-    .error-icon { font-size: 48px; margin-bottom: 4px; }
-    .error-screen h2 { font-size: 20px; font-weight: 800; }
-    .error-screen p { color: var(--sub); font-size: 13px; max-width: 340px; line-height: 1.6; }
-    .retry-btn {
-      background: var(--accent); border: none; color: #fff;
-      padding: 9px 22px; border-radius: 8px; font-weight: 700;
-      font-family: var(--font); cursor: pointer; font-size: 13px;
-      margin-top: 6px; transition: background .15s;
-    }
-    .retry-btn:hover { background: #7d55ff; }
-
-    /* ── WELCOME ──────────────────────────────────────── */
+    /* Welcome Screen */
     .welcome {
       position: absolute;
       inset: 0;
-      background: var(--bg);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0;
-      z-index: 30;
-      padding: 32px 20px;
-      overflow-y: auto;
+      background: linear-gradient(135deg, var(--bg) 0%, #0f172a 100%);
+      color: var(--fg);
+      text-align: center;
+      padding: 20px;
     }
 
     .welcome-logo {
-      width: 64px; height: 64px;
-      background: linear-gradient(135deg, var(--accent), #a066ff);
-      border-radius: 16px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 32px; font-weight: 900;
-      margin-bottom: 18px;
-      box-shadow: 0 8px 32px rgba(110,65,255,0.35);
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      border-radius: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: bold;
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
     }
 
-    .welcome h1 { font-size: 26px; font-weight: 900; margin-bottom: 6px; }
-    .welcome .sub-head { color: var(--sub); font-size: 13px; margin-bottom: 28px; font-weight: 500; }
+    .welcome h1 { 
+      font-size: 32px; 
+      margin-bottom: 12px; 
+      background: linear-gradient(to right, var(--fg), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .welcome p { 
+      color: var(--muted); 
+      margin-bottom: 32px; 
+      max-width: 400px; 
+    }
 
-    /* shortcuts grid */
     .shortcuts {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 16px;
       width: 100%;
-      max-width: 480px;
-      margin-bottom: 28px;
+      max-width: 600px;
     }
 
     .shortcut {
-      background: var(--row);
-      border: 1px solid var(--bar);
-      border-radius: var(--radius);
-      padding: 16px 10px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 10px;
       cursor: pointer;
-      text-align: center;
-      transition: border-color .15s, transform .15s, background .15s;
-    }
-    .shortcut:hover { border-color: var(--accent); transform: translateY(-2px); background: var(--tab-on); }
-    .shortcut:active { transform: scale(0.97); }
-    .shortcut-icon { font-size: 22px; display: block; margin-bottom: 6px; }
-    .shortcut-name { font-size: 11px; color: var(--sub); font-weight: 700; letter-spacing: .3px; }
-
-    /* section label */
-    .section-label {
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      color: var(--sub);
-      text-transform: uppercase;
-      align-self: flex-start;
-      margin-bottom: 8px;
-      max-width: 480px;
-      width: 100%;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
     }
 
-    /* proxy services */
-    .proxies {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100%;
-      max-width: 480px;
+    .shortcut:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 16px rgba(59, 130, 246, 0.1);
     }
 
-    .proxy-row {
-      background: var(--row);
-      border: 1px solid var(--bar);
-      border-radius: var(--radius);
-      padding: 11px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: border-color .15s, background .15s;
-    }
-    .proxy-row:hover { border-color: var(--accent); background: var(--tab-on); }
+    .shortcut-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+    .shortcut-name { font-size: 12px; color: var(--muted); }
 
-    .proxy-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--on);
-      flex-shrink: 0;
-    }
-    .proxy-dot.warn { background: #f0a030; }
-
-    .proxy-name { font-size: 13px; font-weight: 700; }
-    .proxy-desc { font-size: 11px; color: var(--sub); font-weight: 500; margin-left: auto; }
-
-    /* ── SETTINGS PANEL ───────────────────────────────── */
-    .settings-overlay {
+    /* Loading Spinner */
+    .loader {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.55);
-      z-index: 60;
+      background: rgba(10, 14, 26, 0.9);
       display: none;
-      align-items: flex-start;
-      justify-content: flex-end;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
     }
-    .settings-overlay.show { display: flex; }
-
-    .settings-panel {
-      background: var(--row);
-      border-left: 1px solid var(--bar);
-      width: 280px;
-      height: 100%;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      overflow-y: auto;
-      animation: slideIn .2s ease;
+    
+    .spinner {
+      border: 4px solid var(--border);
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
     }
-    @keyframes slideIn { from { transform: translateX(40px); opacity:0; } to { transform: translateX(0); opacity:1; } }
 
-    .panel-title {
-      font-size: 15px;
-      font-weight: 900;
-      color: var(--text);
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Status bar */
+    .status-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 6px 16px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
     }
 
-    .panel-close {
-      background: none; border: none; color: var(--sub);
-      cursor: pointer; font-size: 18px; line-height: 1;
-      transition: color .15s;
-    }
-    .panel-close:hover { color: var(--text); }
-
-    .panel-sep {
-      height: 1px; background: var(--bar);
-    }
-
-    .setting-row {
+    .status-indicator {
       display: flex;
-      flex-direction: column;
+      align-items: center;
       gap: 6px;
     }
 
-    .setting-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--sub);
-      letter-spacing: .4px;
-      text-transform: uppercase;
-    }
-
-    .setting-select, .setting-input {
-      background: var(--tab-bg);
-      border: 1px solid var(--bar);
-      border-radius: 7px;
-      padding: 8px 10px;
-      color: var(--text);
-      font-size: 13px;
-      font-family: var(--font);
-      font-weight: 600;
-      outline: none;
-      width: 100%;
-      transition: border-color .15s;
-    }
-    .setting-select:focus, .setting-input:focus { border-color: var(--accent); }
-    .setting-select option { background: var(--row); }
-
-    /* toggle row in settings */
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .toggle-lbl { font-size: 13px; font-weight: 700; color: var(--text); }
-    .toggle-sub { font-size: 11px; color: var(--sub); font-weight: 500; margin-top: 1px; }
-    .toggle-left { display: flex; flex-direction: column; }
-
-    .toggle-track {
-      width: 40px; height: 20px;
-      border-radius: 10px;
-      background: var(--off);
-      position: relative;
-      cursor: pointer;
-      transition: background .15s;
-      flex-shrink: 0;
-      border: none;
-    }
-    .toggle-track.on { background: var(--on); }
-    .toggle-knob {
-      position: absolute;
-      width: 14px; height: 14px;
-      background: #fff;
-      border-radius: 50%;
-      top: 3px; left: 3px;
-      transition: left .15s;
-      pointer-events: none;
-    }
-    .toggle-track.on .toggle-knob { left: 23px; }
-
-    /* accent color swatches */
-    .swatch-row {
-      display: flex; gap: 8px; flex-wrap: wrap;
-    }
-    .swatch {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: border-color .15s, transform .15s;
-    }
-    .swatch:hover   { transform: scale(1.15); }
-    .swatch.active  { border-color: #fff; }
-
-    /* ── STATUS BAR ───────────────────────────────────── */
-    .status-bar {
-      height: 22px;
-      background: var(--tab-bg);
-      border-top: 1px solid var(--bar);
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      gap: 16px;
-      flex-shrink: 0;
-    }
-    .status-item {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--sub);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
     .status-dot {
-      width: 6px; height: 6px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: var(--on);
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
   </style>
 </head>
 <body>
 
-<!-- CHROME -->
-<div class="chrome">
-  <div class="brand">Yllx</div>
-  <div class="sep"></div>
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <div class="brand">Yllx</div>
+    
+    <button class="nav-btn" id="backBtn" title="Back">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
+    <button class="nav-btn" id="forwardBtn" title="Forward">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
 
-  <button class="nav-btn" id="backBtn" title="Back" disabled>
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-  </button>
-  <button class="nav-btn" id="forwardBtn" title="Forward" disabled>
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-  </button>
-  <button class="nav-btn" id="refreshBtn" title="Refresh">
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
-  </button>
-  <button class="nav-btn" id="homeBtn" title="Home">
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-  </button>
+    <div class="url-bar-container">
+      <input type="text" class="url-bar" id="urlInput" placeholder="Search YouTube or enter URL..." autocomplete="off">
+    </div>
 
-  <div class="url-wrap">
-    <span class="url-icon">
-      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    </span>
-    <input type="text" class="url-bar" id="urlInput" placeholder="Search or enter a URL..." autocomplete="off" spellcheck="false">
+    <button class="go-btn" id="goBtn">Go</button>
   </div>
 
-  <button class="go-btn" id="goBtn">Go</button>
-  <button class="settings-btn" id="settingsBtn" title="Settings">
-    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-  </button>
-</div>
+  <!-- Content Area -->
+  <div class="content-area">
+    <!-- Loading Spinner -->
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+    </div>
 
-<!-- MAIN -->
-<div class="main">
-
-  <!-- Loader -->
-  <div class="loader" id="loader">
-    <div class="spinner"></div>
-    <div class="loader-text" id="loaderText">Loading...</div>
-  </div>
-
-  <!-- Error -->
-  <div class="error-screen" id="errorScreen">
-    <div class="error-icon">⚠️</div>
-    <h2>Couldn't load page</h2>
-    <p id="errorMsg">The site may be blocking proxies, or the URL is invalid. Try a different proxy service in Settings.</p>
-    <button class="retry-btn" id="retryBtn">Try Again</button>
-  </div>
-
-  <!-- Welcome -->
-  <div class="welcome" id="welcomeScreen">
-    <div class="welcome-logo">Y</div>
-    <h1>Browse Freely</h1>
-    <p class="sub-head">YouTube, Google, TikTok and more — unblocked.</p>
-
-    <div class="shortcuts">
-      <div class="shortcut" data-url="https://www.youtube.com">
-        <span class="shortcut-icon">▶️</span>
-        <span class="shortcut-name">YouTube</span>
-      </div>
-      <div class="shortcut" data-url="https://www.google.com">
-        <span class="shortcut-icon">🔍</span>
-        <span class="shortcut-name">Google</span>
-      </div>
-      <div class="shortcut" data-url="https://www.tiktok.com">
-        <span class="shortcut-icon">🎵</span>
-        <span class="shortcut-name">TikTok</span>
-      </div>
-      <div class="shortcut" data-url="https://www.reddit.com">
-        <span class="shortcut-icon">💬</span>
-        <span class="shortcut-name">Reddit</span>
-      </div>
-      <div class="shortcut" data-url="https://www.twitch.tv">
-        <span class="shortcut-icon">🟣</span>
-        <span class="shortcut-name">Twitch</span>
-      </div>
-      <div class="shortcut" data-url="https://www.github.com">
-        <span class="shortcut-icon">⚫</span>
-        <span class="shortcut-name">GitHub</span>
+    <!-- Welcome Screen -->
+    <div class="welcome" id="welcomeScreen">
+      <div class="welcome-logo">Y</div>
+      <h1>Browse Freely</h1>
+      <p>Access YouTube, TikTok, and more with our advanced proxy.</p>
+      
+      <div class="shortcuts">
+        <div class="shortcut" data-url="https://www.youtube.com">
+          <span class="shortcut-icon">▶️</span>
+          <span class="shortcut-name">YouTube</span>
+        </div>
+        <div class="shortcut" data-url="https://www.tiktok.com">
+          <span class="shortcut-icon">🎵</span>
+          <span class="shortcut-name">TikTok</span>
+        </div>
+        <div class="shortcut" data-url="https://www.google.com">
+          <span class="shortcut-icon">G</span>
+          <span class="shortcut-name">Google</span>
+        </div>
       </div>
     </div>
 
-    <div class="section-label">Proxy Services</div>
-    <div class="proxies" id="proxyList">
-      <div class="proxy-row" data-proxy="ultraviolet">
-        <div class="proxy-dot"></div>
-        <div>
-          <div class="proxy-name">Ultraviolet</div>
-        </div>
-        <div class="proxy-desc">Recommended</div>
-      </div>
-      <div class="proxy-row" data-proxy="rammerhead">
-        <div class="proxy-dot"></div>
-        <div>
-          <div class="proxy-name">Rammerhead</div>
-        </div>
-        <div class="proxy-desc">Fast</div>
-      </div>
-      <div class="proxy-row" data-proxy="corrosion">
-        <div class="proxy-dot warn"></div>
-        <div>
-          <div class="proxy-name">Corrosion</div>
-        </div>
-        <div class="proxy-desc">Experimental</div>
-      </div>
-    </div>
+    <!-- Proxy Frame -->
+    <iframe class="proxy-frame" id="proxyFrame" style="display:none;" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
   </div>
 
-  <!-- Proxy iframe -->
-  <iframe class="proxy-frame" id="proxyFrame" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
-
-  <!-- Settings panel -->
-  <div class="settings-overlay" id="settingsOverlay">
-    <div class="settings-panel" id="settingsPanel">
-      <div class="panel-title">
-        Settings
-        <button class="panel-close" id="panelClose">✕</button>
-      </div>
-      <div class="panel-sep"></div>
-
-      <div class="setting-row">
-        <div class="setting-label">Proxy Service</div>
-        <select class="setting-select" id="proxySelect">
-          <option value="ultraviolet">Ultraviolet (Recommended)</option>
-          <option value="rammerhead">Rammerhead</option>
-          <option value="corrosion">Corrosion</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-label">Search Engine</div>
-        <select class="setting-select" id="searchSelect">
-          <option value="https://www.google.com/search?q=">Google</option>
-          <option value="https://www.bing.com/search?q=">Bing</option>
-          <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
-          <option value="https://search.yahoo.com/search?p=">Yahoo</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-label">Custom Proxy URL</div>
-        <input type="text" class="setting-input" id="customProxy" placeholder="https://yourproxy.com/service/" spellcheck="false">
-      </div>
-
-      <div class="panel-sep"></div>
-
-      <div class="setting-row">
-        <div class="toggle-row">
-          <div class="toggle-left">
-            <div class="toggle-lbl">Open in New Tab</div>
-            <div class="toggle-sub">Navigate outside the frame</div>
-          </div>
-          <button class="toggle-track" id="newTabToggle">
-            <div class="toggle-knob"></div>
-          </button>
-        </div>
-      </div>
-
-      <div class="setting-row">
-        <div class="toggle-row">
-          <div class="toggle-left">
-            <div class="toggle-lbl">Dark Frame</div>
-            <div class="toggle-sub">Dark background behind pages</div>
-          </div>
-          <button class="toggle-track on" id="darkFrameToggle">
-            <div class="toggle-knob"></div>
-          </button>
-        </div>
-      </div>
-
-      <div class="panel-sep"></div>
-
-      <div class="setting-row">
-        <div class="setting-label">Accent Color</div>
-        <div class="swatch-row" id="swatchRow">
-          <div class="swatch active" data-color="#6e41ff" style="background:#6e41ff"></div>
-          <div class="swatch" data-color="#e02d4a" style="background:#e02d4a"></div>
-          <div class="swatch" data-color="#2dce7a" style="background:#2dce7a"></div>
-          <div class="swatch" data-color="#2d8fff" style="background:#2d8fff"></div>
-          <div class="swatch" data-color="#ff8c00" style="background:#ff8c00"></div>
-          <div class="swatch" data-color="#e040fb" style="background:#e040fb"></div>
-        </div>
-      </div>
-
-      <div class="panel-sep"></div>
-
-      <div class="setting-row">
-        <div class="setting-label">About</div>
-        <div style="font-size:12px;color:var(--sub);font-weight:600;line-height:1.6;">
-          Yllx v1.0<br>
-          Styled after Lags Menu<br>
-          <span style="color:var(--sub);font-size:11px;">Proxy requires a backend server to function. Configure your proxy URL above.</span>
-        </div>
-      </div>
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-indicator">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Ready</span>
     </div>
+    <div>Yllx v1.0</div>
   </div>
 
-</div>
+  <script>
+    const urlInput = document.getElementById('urlInput');
+    const goBtn = document.getElementById('goBtn');
+    const proxyFrame = document.getElementById('proxyFrame');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const loader = document.getElementById('loader');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const shortcuts = document.querySelectorAll('.shortcut');
 
-<!-- STATUS BAR -->
-<div class="status-bar">
-  <div class="status-item"><div class="status-dot" id="statusDot"></div><span id="statusText">Ready</span></div>
-  <div class="status-item" id="proxyLabel">Proxy: Ultraviolet</div>
-  <div class="status-item" id="urlDisplay" style="margin-left:auto;overflow:hidden;max-width:300px;text-overflow:ellipsis;white-space:nowrap;"></div>
-</div>
-
-<script>
-  // ── STATE ──────────────────────────────────────────────────────────────────
-  const state = {
-    proxy: 'ultraviolet',
-    searchEngine: 'https://www.google.com/search?q=',
-    customProxy: '',
-    newTab: false,
-    darkFrame: true,
-    history: [],
-    historyIndex: -1,
-    currentUrl: '',
-    loading: false,
-  };
-
-  // ── ELEMENTS ───────────────────────────────────────────────────────────────
-  const urlInput       = document.getElementById('urlInput');
-  const goBtn          = document.getElementById('goBtn');
-  const backBtn        = document.getElementById('backBtn');
-  const forwardBtn     = document.getElementById('forwardBtn');
-  const refreshBtn     = document.getElementById('refreshBtn');
-  const homeBtn        = document.getElementById('homeBtn');
-  const settingsBtn    = document.getElementById('settingsBtn');
-  const proxyFrame     = document.getElementById('proxyFrame');
-  const welcomeScreen  = document.getElementById('welcomeScreen');
-  const loader         = document.getElementById('loader');
-  const loaderText     = document.getElementById('loaderText');
-  const errorScreen    = document.getElementById('errorScreen');
-  const retryBtn       = document.getElementById('retryBtn');
-  const settingsOverlay= document.getElementById('settingsOverlay');
-  const panelClose     = document.getElementById('panelClose');
-  const proxySelect    = document.getElementById('proxySelect');
-  const searchSelect   = document.getElementById('searchSelect');
-  const customProxyIn  = document.getElementById('customProxy');
-  const newTabToggle   = document.getElementById('newTabToggle');
-  const darkFrameToggle= document.getElementById('darkFrameToggle');
-  const swatchRow      = document.getElementById('swatchRow');
-  const statusDot      = document.getElementById('statusDot');
-  const statusText     = document.getElementById('statusText');
-  const proxyLabel     = document.getElementById('proxyLabel');
-  const urlDisplay     = document.getElementById('urlDisplay');
-
-  // ── URL PROCESSING ─────────────────────────────────────────────────────────
-  function processUrl(input) {
-    let url = input.trim();
-    if (!url) return null;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      if (url.includes('.') && !url.includes(' ')) {
-        url = 'https://' + url;
-      } else {
-        url = state.searchEngine + encodeURIComponent(url);
+    // Format URL helper
+    function processUrl(input) {
+      let url = input.trim();
+      
+      // If no protocol, add https
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        // Check if it looks like a domain
+        if (url.includes('.') && !url.includes(' ')) {
+          url = 'https://' + url;
+        } else {
+          // Treat as YouTube search for convenience
+          url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(url);
+        }
       }
-    }
-    return url;
-  }
-
-  function buildProxyUrl(url) {
-    if (state.customProxy) return state.customProxy + encodeURIComponent(url);
-    const prefixes = {
-      ultraviolet: '/service/uv/',
-      rammerhead:  '/service/rh/',
-      corrosion:   '/service/co/',
-    };
-    return (prefixes[state.proxy] || '/proxy/') + encodeURIComponent(url);
-  }
-
-  // ── NAVIGATION ─────────────────────────────────────────────────────────────
-  function setStatus(text, online = true) {
-    statusText.textContent = text;
-    statusDot.style.background = online ? 'var(--on)' : 'var(--off)';
-  }
-
-  function updateNavButtons() {
-    backBtn.disabled    = state.historyIndex <= 0;
-    forwardBtn.disabled = state.historyIndex >= state.history.length - 1;
-  }
-
-  function showLoader(text = 'Loading...') {
-    loader.classList.add('show');
-    loaderText.textContent = text;
-    errorScreen.classList.remove('show');
-    welcomeScreen.style.display = 'none';
-    proxyFrame.style.display = 'none';
-    state.loading = true;
-    setStatus('Loading...', true);
-  }
-
-  function hideLoader() {
-    loader.classList.remove('show');
-    state.loading = false;
-  }
-
-  function showError(msg) {
-    hideLoader();
-    errorScreen.classList.add('show');
-    document.getElementById('errorMsg').textContent = msg || 'Failed to load page.';
-    setStatus('Error', false);
-  }
-
-  function navigate(rawUrl, addToHistory = true) {
-    const url = processUrl(rawUrl);
-    if (!url) return;
-
-    if (state.newTab) {
-      window.open(url, '_blank');
-      return;
+      return url;
     }
 
-    state.currentUrl = url;
-    urlInput.value   = url;
-    urlDisplay.textContent = url;
+    function navigate(url) {
+      url = processUrl(url);
+      
+      // Show loading
+      loader.style.display = 'flex';
+      welcomeScreen.style.display = 'none';
+      proxyFrame.style.display = 'none';
+      statusText.textContent = 'Loading...';
+      statusDot.style.background = '#f59e0b';
 
-    if (addToHistory) {
-      state.history = state.history.slice(0, state.historyIndex + 1);
-      state.history.push(url);
-      state.historyIndex = state.history.length - 1;
+      // Use Ultraviolet proxy path
+      const proxyUrl = '/service/uv/' + encodeURIComponent(url);
+      
+      // Update UI
+      urlInput.value = url;
+      
+      // Load in iframe
+      proxyFrame.src = proxyUrl;
+      
+      // Hide loader when loaded
+      proxyFrame.onload = () => {
+        loader.style.display = 'none';
+        proxyFrame.style.display = 'block';
+        statusText.textContent = 'Connected';
+        statusDot.style.background = 'var(--accent)';
+      };
+      
+      // Error handling
+      proxyFrame.onerror = () => {
+        loader.style.display = 'none';
+        statusText.textContent = 'Error';
+        statusDot.style.background = '#ef4444';
+        alert('Failed to load the page. The site might be blocking proxies.');
+      };
     }
-    updateNavButtons();
 
-    showLoader('Connecting to ' + (new URL(url).hostname));
-
-    const proxyUrl = buildProxyUrl(url);
-    proxyFrame.src = proxyUrl;
-
-    proxyLabel.textContent = 'Proxy: ' + state.proxy.charAt(0).toUpperCase() + state.proxy.slice(1);
-
-    const timeout = setTimeout(() => {
-      if (state.loading) showError('Timed out. The site may be blocking proxies, or no backend is configured.');
-    }, 12000);
-
-    proxyFrame.onload = () => {
-      clearTimeout(timeout);
-      hideLoader();
-      proxyFrame.style.display = 'block';
-      setStatus('Loaded');
-    };
-
-    proxyFrame.onerror = () => {
-      clearTimeout(timeout);
-      showError('Failed to load. The site may be blocking proxies.');
-    };
-  }
-
-  function goBack() {
-    if (state.historyIndex > 0) {
-      state.historyIndex--;
-      navigate(state.history[state.historyIndex], false);
-    }
-  }
-
-  function goForward() {
-    if (state.historyIndex < state.history.length - 1) {
-      state.historyIndex++;
-      navigate(state.history[state.historyIndex], false);
-    }
-  }
-
-  function refresh() {
-    if (state.currentUrl) navigate(state.currentUrl, false);
-  }
-
-  function goHome() {
-    errorScreen.classList.remove('show');
-    hideLoader();
-    proxyFrame.style.display = 'none';
-    proxyFrame.src = 'about:blank';
-    welcomeScreen.style.display = 'flex';
-    state.currentUrl = '';
-    urlInput.value = '';
-    urlDisplay.textContent = '';
-    setStatus('Ready');
-  }
-
-  // ── EVENTS ─────────────────────────────────────────────────────────────────
-  goBtn.addEventListener('click', () => navigate(urlInput.value));
-  urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') navigate(urlInput.value); });
-
-  backBtn.addEventListener('click', goBack);
-  forwardBtn.addEventListener('click', goForward);
-  refreshBtn.addEventListener('click', refresh);
-  homeBtn.addEventListener('click', goHome);
-  retryBtn.addEventListener('click', () => { errorScreen.classList.remove('show'); refresh(); });
-
-  document.querySelectorAll('.shortcut').forEach(el => {
-    el.addEventListener('click', () => navigate(el.dataset.url));
-  });
-
-  document.querySelectorAll('.proxy-row').forEach(el => {
-    el.addEventListener('click', () => {
-      state.proxy = el.dataset.proxy;
-      proxySelect.value = state.proxy;
-      proxyLabel.textContent = 'Proxy: ' + el.querySelector('.proxy-name').textContent;
-      // highlight selected
-      document.querySelectorAll('.proxy-row').forEach(r => r.style.borderColor = '');
-      el.style.borderColor = 'var(--accent)';
+    // Event Listeners
+    goBtn.addEventListener('click', () => navigate(urlInput.value));
+    
+    urlInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') navigate(urlInput.value);
     });
-  });
 
-  // settings
-  settingsBtn.addEventListener('click', () => settingsOverlay.classList.add('show'));
-  panelClose.addEventListener('click',  () => settingsOverlay.classList.remove('show'));
-  settingsOverlay.addEventListener('click', e => {
-    if (e.target === settingsOverlay) settingsOverlay.classList.remove('show');
-  });
-
-  proxySelect.addEventListener('change', () => {
-    state.proxy = proxySelect.value;
-    proxyLabel.textContent = 'Proxy: ' + proxySelect.options[proxySelect.selectedIndex].text.split(' ')[0];
-  });
-
-  searchSelect.addEventListener('change', () => { state.searchEngine = searchSelect.value; });
-  customProxyIn.addEventListener('input',  () => { state.customProxy = customProxyIn.value.trim(); });
-
-  function makeToggle(btn, key) {
-    btn.addEventListener('click', () => {
-      state[key] = !state[key];
-      btn.classList.toggle('on', state[key]);
+    shortcuts.forEach(btn => {
+      btn.addEventListener('click', () => navigate(btn.getAttribute('data-url')));
     });
-  }
-  makeToggle(newTabToggle,    'newTab');
-  makeToggle(darkFrameToggle, 'darkFrame');
 
-  darkFrameToggle.addEventListener('click', () => {
-    document.querySelector('.main').style.background = state.darkFrame ? '#fff' : 'var(--bg)';
-  });
-
-  // accent color swatches
-  swatchRow.querySelectorAll('.swatch').forEach(sw => {
-    sw.addEventListener('click', () => {
-      swatchRow.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
-      sw.classList.add('active');
-      document.documentElement.style.setProperty('--accent', sw.dataset.color);
-      // derive dim (darker version)
-      document.documentElement.style.setProperty('--dim', sw.dataset.color + 'aa');
+    // Handle Back/Forward (basic implementation using history API)
+    window.addEventListener('popstate', () => {
+      location.reload();
     });
-  });
-
-  // keyboard shortcut: Ctrl+L focuses url bar
-  document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
-      e.preventDefault();
-      urlInput.focus();
-      urlInput.select();
-    }
-    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-      e.preventDefault();
-      refresh();
-    }
-  });
-
-  // init
-  updateNavButtons();
-  setStatus('Ready');
-</script>
+  </script>
 </body>
 </html>
