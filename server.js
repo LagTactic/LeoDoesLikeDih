@@ -1,31 +1,32 @@
 const express = require('express');
 const Unblocker = require('unblocker');
 const path = require('path');
+const axios = require('axios'); // Add this at the top
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Configure Proxy for YouTube/TikTok
-const unblocker = new Unblocker({
-    prefix: '/proxy/',
-    requestMiddleware: [
-        (proxyReq) => {
-            proxyReq.headers['user-agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36';
-            proxyReq.headers['accept-language'] = 'en-US,en;q=0.9';
-            proxyReq.headers['accept-encoding'] = 'identity';
-            delete proxyReq.headers['cf-connecting-ip'];
-            delete proxyReq.headers['cf-ray'];
+// ... your existing Unblocker configuration ...
+
+// Keep-Alive Mechanism (Prevents Render from spinning down)
+const keepAlive = () => {
+    const url = `https://${process.env.RENDER_EXTERNAL_URL}/` || `http://localhost:${PORT}/`;
+    
+    // Ping every 14 minutes (Render spins down after 15 min of inactivity)
+    setInterval(async () => {
+        try {
+            const response = await axios.get(url);
+            console.log(`✅ Keep-alive ping sent at ${new Date().toISOString()}`);
+        } catch (error) {
+            console.error(`❌ Keep-alive failed: ${error.message}`);
         }
-    ]
-});
+    }, 14 * 60 * 1000); // 14 minutes in milliseconds
+};
 
-app.use(unblocker);
+// ... rest of your existing code ...
 
-// FIX: Serve index.html directly from the main folder
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-});
-
+// Start keep-alive when server starts
 app.listen(PORT, () => {
-    console.log('Yllx Proxy is running!');
+    console.log(`Yllx Proxy is running on port ${PORT}`);
+    keepAlive(); // Start the keep-alive mechanism
 });
