@@ -1,621 +1,914 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yllx — Secure Browser</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg-void: #04060d;
-  --bg-deep: #070b14;
-  --bg-surface: #0c1220;
-  --bg-elevated: #111827;
-  --bg-hover: rgba(255,255,255,0.04);
-  --bg-active: rgba(255,255,255,0.08);
-  --fg-primary: #e8edf5;
-  --fg-secondary: #6b7a96;
-  --fg-muted: #323d52;
-  --accent: #3b82f6;
-  --accent-dim: rgba(59,130,246,0.15);
-  --accent-glow: rgba(59,130,246,0.3);
-  --accent-bright: #60a5fa;
-  --border-dim: rgba(255,255,255,0.055);
-  --border-mid: rgba(255,255,255,0.1);
-  --panel-w: 340px;
-  --radius: 10px;
-  --radius-sm: 7px;
-  --tr: 0.18s ease;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
-body{font-family:'DM Sans',sans-serif;background:var(--bg-void);color:var(--fg-primary);display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;user-select:none}
-::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--fg-muted);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--fg-secondary)}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yllx</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent:   #6e41ff;
+      --dim:      #4126a5;
+      --bg:       #0d0d12;
+      --row:      #14141e;
+      --tab-bg:   #111119;
+      --tab-on:   #1a1a28;
+      --text:     #dcdaeb;
+      --sub:      #78768f;
+      --bar:      #2d2b46;
+      --on:       #3cc85a;
+      --off:      #c83737;
+      --radius:   10px;
+      --font:     'Nunito', sans-serif;
+    }
 
-/* TAB BAR */
-.tab-bar{height:38px;background:var(--bg-deep);border-bottom:1px solid var(--border-dim);display:flex;align-items:flex-end;padding:0 10px;gap:3px;flex-shrink:0;overflow-x:auto;overflow-y:hidden}
-.tab-bar::-webkit-scrollbar{height:0}
-.tab{height:30px;min-width:120px;max-width:200px;padding:0 10px 0 12px;background:transparent;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;color:var(--fg-secondary);font-size:11.5px;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:7px;transition:var(--tr);flex-shrink:0}
-.tab:hover{background:var(--bg-hover);color:var(--fg-primary)}
-.tab.active{background:var(--bg-surface);border-color:var(--border-dim);color:var(--fg-primary)}
-.tab-dot{width:9px;height:9px;border-radius:50%;background:var(--fg-muted);flex-shrink:0;transition:background 0.3s}
-.tab-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tab-x{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s,background 0.15s;flex-shrink:0;cursor:pointer;color:var(--fg-muted)}
-.tab:hover .tab-x,.tab.active .tab-x{opacity:1}
-.tab-x:hover{background:var(--bg-active);color:var(--fg-primary)}
-.add-tab{width:28px;height:28px;min-width:28px;background:transparent;border:none;color:var(--fg-muted);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:2px;transition:var(--tr)}
-.add-tab:hover{background:var(--bg-hover);color:var(--fg-primary)}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* NAVBAR */
-.navbar{height:58px;background:var(--bg-surface);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;position:relative;z-index:10}
-.navbar::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 100% at 50% 0%,rgba(59,130,246,0.04),transparent)}
-.brand{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.3px;color:var(--fg-primary);flex-shrink:0;display:flex;align-items:center;gap:7px}
-.brand-icon{width:24px;height:24px;background:linear-gradient(135deg,var(--accent),var(--accent-bright));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;box-shadow:0 0 10px var(--accent-glow);transition:box-shadow 0.3s}
-.vd{width:1px;height:18px;background:var(--border-dim);flex-shrink:0}
-.ng{display:flex;align-items:center;gap:2px;flex-shrink:0}
-.nb{width:30px;height:30px;background:none;border:none;color:var(--fg-muted);cursor:pointer;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;transition:var(--tr);flex-shrink:0}
-.nb:hover:not(:disabled){background:var(--bg-hover);color:var(--fg-primary)}
-.nb:active:not(:disabled){transform:scale(0.88)}
-.nb:disabled{opacity:0.25;cursor:not-allowed}
-.nb svg{pointer-events:none;flex-shrink:0}
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-/* URL BAR */
-.uw{flex:1;max-width:660px;margin:0 auto;position:relative}
-.ui{display:flex;align-items:center;background:var(--bg-elevated);border:1px solid var(--border-dim);border-radius:var(--radius);padding:0 10px;gap:7px;transition:border-color 0.2s,box-shadow 0.2s}
-.uw:focus-within .ui{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
-.ulock{color:var(--fg-muted);display:flex;align-items:center;flex-shrink:0;transition:color 0.2s}
-.ulock.sec{color:#22c55e}
-.uinput{flex:1;background:transparent;border:none;outline:none;color:var(--fg-primary);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;padding:8px 0;min-width:0}
-.uinput::placeholder{color:var(--fg-muted)}
-.star{background:none;border:none;cursor:pointer;color:var(--fg-muted);display:flex;align-items:center;padding:4px;border-radius:5px;transition:var(--tr);flex-shrink:0}
-.star:hover{color:var(--fg-primary)}
-.star.on{color:#f59e0b}
-.star.on svg{fill:#f59e0b}
-.gobtn{background:var(--accent);border:none;padding:6px 16px;border-radius:var(--radius-sm);color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:var(--tr);flex-shrink:0;white-space:nowrap}
-.gobtn:hover{filter:brightness(1.15);box-shadow:0 0 14px var(--accent-glow)}
-.gobtn:active{transform:scale(0.95)}
+    /* ── TOP CHROME ───────────────────────────────────── */
+    .chrome {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      background: var(--row);
+      border-bottom: 1px solid var(--bar);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 50;
+    }
 
-/* ACTION BUTTONS */
-.ab{width:30px;height:30px;background:none;border:none;color:var(--fg-muted);cursor:pointer;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;transition:var(--tr);flex-shrink:0;position:relative}
-.ab:hover{background:var(--bg-hover);color:var(--fg-primary)}
-.ab.on{background:var(--accent-dim);color:var(--accent)}
-.badge{position:absolute;top:3px;right:3px;width:8px;height:8px;background:var(--accent);border-radius:50%;border:1.5px solid var(--bg-surface);display:none}
-.badge.v{display:block}
+    .brand {
+      font-weight: 900;
+      font-size: 17px;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+      margin-right: 4px;
+      white-space: nowrap;
+    }
 
-/* CONTENT */
-.content{flex:1;position:relative;overflow:hidden;display:flex}
-.progress{position:absolute;top:0;left:0;right:0;height:2px;z-index:300;pointer-events:none}
-.pfill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-bright));transition:width 0.25s ease;box-shadow:0 0 8px var(--accent-glow)}
-.frames{flex:1;position:relative;overflow:hidden}
-.pf{position:absolute;inset:0;width:100%;height:100%;border:none;display:none;background:#fff}
-.pf.act{display:block}
+    .sep {
+      width: 1px;
+      height: 20px;
+      background: var(--bar);
+      flex-shrink: 0;
+    }
 
-/* WELCOME */
-.wsc{position:absolute;inset:0;background:var(--bg-void);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;overflow-y:auto;z-index:5}
-.wsc.hid{display:none}
-.wsc::before{content:'';position:absolute;width:700px;height:500px;background:radial-gradient(ellipse,rgba(59,130,246,0.08) 0%,transparent 70%);top:40%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
-.wsc::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.035) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
-.win{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;max-width:560px}
-.wlogo{width:60px;height:60px;background:linear-gradient(135deg,#1d4ed8,var(--accent-bright));border-radius:16px;margin-bottom:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px var(--accent-glow),0 0 80px rgba(59,130,246,0.08);position:relative}
-.wlogo::before{content:'';position:absolute;inset:-1px;border-radius:17px;background:linear-gradient(135deg,rgba(255,255,255,0.18),transparent 60%);pointer-events:none}
-.wl{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:#fff}
-.wt{font-family:'Syne',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.6px;margin-bottom:8px;text-align:center}
-.ws{font-size:13px;color:var(--fg-secondary);margin-bottom:40px;text-align:center;font-weight:300}
-.sclbl{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-muted);align-self:flex-start;margin-bottom:10px}
-.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;margin-bottom:36px}
-.sc{background:var(--bg-surface);border:1px solid var(--border-dim);border-radius:12px;padding:18px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:9px;transition:transform 0.2s,border-color 0.2s,box-shadow 0.2s;position:relative;overflow:hidden}
-.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent)}
-.sc:hover{transform:translateY(-2px);border-color:var(--border-mid);box-shadow:0 8px 24px rgba(0,0,0,0.4)}
-.sci{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.scn{font-size:11px;color:var(--fg-secondary)}
-.hints{display:flex;align-items:center;gap:14px;font-size:10px;color:var(--fg-muted)}
-.hint{display:flex;align-items:center;gap:5px}
-.kbd{background:var(--bg-elevated);border:1px solid var(--border-dim);border-radius:4px;padding:2px 5px;font-size:9px;color:var(--fg-muted)}
+    /* nav icon buttons */
+    .nav-btn {
+      background: var(--tab-bg);
+      border: 1px solid var(--bar);
+      border-radius: 7px;
+      color: var(--sub);
+      cursor: pointer;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s, border-color .15s;
+      flex-shrink: 0;
+    }
+    .nav-btn:hover   { background: var(--tab-on); color: var(--text); border-color: var(--accent); }
+    .nav-btn:active  { background: var(--dim); }
+    .nav-btn:disabled{ opacity: 0.35; cursor: default; pointer-events: none; }
 
-/* LOADER */
-.loader{position:absolute;inset:0;background:var(--bg-deep);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:10}
-.loader.on{display:flex}
-.lring{width:40px;height:40px;border-radius:50%;border:2px solid var(--border-dim);border-top-color:var(--accent);animation:spin 0.75s linear infinite}
-.ltxt{font-size:12px;color:var(--fg-secondary);font-weight:300}
-@keyframes spin{to{transform:rotate(360deg)}}
+    /* url bar */
+    .url-wrap {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
 
-/* STATUS BAR */
-.sbar{position:absolute;bottom:0;left:0;right:0;height:22px;background:var(--bg-deep);border-top:1px solid var(--border-dim);display:flex;align-items:center;padding:0 12px;gap:16px;z-index:20;pointer-events:none}
-.si{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--fg-muted)}
-.sdot{width:6px;height:6px;border-radius:50%;background:var(--fg-muted);transition:background 0.3s}
-.sdot.sec{background:#22c55e;box-shadow:0 0 4px rgba(34,197,94,0.6)}
-.surl{margin-left:auto;font-size:10px;color:var(--fg-muted);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .url-icon {
+      position: absolute;
+      left: 11px;
+      color: var(--sub);
+      pointer-events: none;
+      display: flex;
+    }
 
-/* PANEL */
-.backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.4);z-index:50;display:none;backdrop-filter:blur(2px)}
-.backdrop.on{display:block}
-.panel{position:absolute;top:0;right:0;bottom:0;width:var(--panel-w);background:var(--bg-surface);border-left:1px solid var(--border-dim);display:flex;flex-direction:column;z-index:51;transform:translateX(100%);transition:transform 0.25s cubic-bezier(0.4,0,0.2,1)}
-.panel.open{transform:translateX(0)}
-.ph{padding:16px 16px 12px;border-bottom:1px solid var(--border-dim);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.pt{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.2px}
-.pc{width:28px;height:28px;background:none;border:none;color:var(--fg-muted);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:var(--tr)}
-.pc:hover{background:var(--bg-hover);color:var(--fg-primary)}
-.pb{flex:1;overflow-y:auto;padding:12px 16px}
-.pb::-webkit-scrollbar{width:3px}
+    .url-bar {
+      width: 100%;
+      background: var(--tab-bg);
+      border: 1px solid var(--bar);
+      border-radius: 8px;
+      padding: 8px 12px 8px 34px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font);
+      font-weight: 600;
+      outline: none;
+      transition: border-color .15s, background .15s;
+    }
+    .url-bar::placeholder { color: var(--sub); font-weight: 500; }
+    .url-bar:focus { border-color: var(--accent); background: var(--row); }
 
-/* SETTINGS */
-.ss{margin-bottom:24px}
-.ssl{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-muted);margin-bottom:10px}
-.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-dim);gap:12px}
-.sr:last-child{border-bottom:none}
-.slbl{font-size:13px;color:var(--fg-secondary)}
-.sinput{flex:1;max-width:180px;background:var(--bg-elevated);border:1px solid var(--border-dim);border-radius:var(--radius-sm);padding:6px 10px;color:var(--fg-primary);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;transition:border-color 0.2s}
-.sinput:focus{border-color:var(--accent)}
-.ssel{background:var(--bg-elevated);border:1px solid var(--border-dim);border-radius:var(--radius-sm);padding:6px 26px 6px 10px;color:var(--fg-primary);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%236b7a96' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
-.ssel option{background:var(--bg-elevated);color:var(--fg-primary)}
+    .go-btn {
+      background: var(--accent);
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      flex-shrink: 0;
+    }
+    .go-btn:hover  { background: #7d55ff; }
+    .go-btn:active { transform: scale(0.97); background: var(--dim); }
 
-/* THEME GRID */
-.tg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:4px}
-.tsw{aspect-ratio:1;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:all 0.2s;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px}
-.tsw.sel{border-color:var(--fg-primary)!important;transform:scale(1.06)}
-.tsw:hover:not(.sel){transform:scale(1.06)}
-.tsn{font-size:9px;color:rgba(255,255,255,0.7);font-weight:500;text-align:center}
+    /* settings cog */
+    .settings-btn {
+      background: var(--tab-bg);
+      border: 1px solid var(--bar);
+      border-radius: 7px;
+      color: var(--sub);
+      cursor: pointer;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s;
+      flex-shrink: 0;
+    }
+    .settings-btn:hover { background: var(--tab-on); color: var(--text); }
 
-/* DANGER BUTTONS */
-.dbtn{width:100%;padding:9px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius-sm);color:#ef4444;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:var(--tr);margin-bottom:8px}
-.dbtn:hover{background:rgba(239,68,68,0.18);border-color:rgba(239,68,68,0.5)}
+    /* ── MAIN AREA ────────────────────────────────────── */
+    .main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
 
-/* BOOKMARKS */
-.bempty,.dlempty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:10px;color:var(--fg-muted);text-align:center}
-.bmi{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-dim);cursor:pointer;transition:var(--tr)}
-.bmi:last-child{border-bottom:none}
-.bmi:hover .bmin{color:var(--accent-bright)}
-.bmd{width:28px;height:28px;border-radius:7px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--fg-muted)}
-.bmif{flex:1;min-width:0}
-.bmin{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;transition:color 0.15s}
-.bmiu{font-size:10px;color:var(--fg-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bmdel{width:22px;height:22px;border-radius:5px;border:none;background:transparent;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:var(--tr);flex-shrink:0}
-.bmi:hover .bmdel{opacity:1}
-.bmdel:hover{background:rgba(239,68,68,0.15);color:#ef4444}
+    .proxy-frame {
+      width: 100%; height: 100%;
+      border: none;
+      display: none;
+      background: #fff;
+    }
 
-/* TOAST */
-.toast{position:fixed;bottom:36px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg-elevated);border:1px solid var(--border-mid);border-radius:10px;padding:9px 18px;font-size:12px;color:var(--fg-primary);z-index:1000;opacity:0;transition:opacity 0.25s,transform 0.25s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
-.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+    /* ── LOADER ───────────────────────────────────────── */
+    .loader {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 40;
+    }
+    .loader.show { display: flex; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--bar);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    .loader-text { color: var(--sub); font-size: 13px; font-weight: 600; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-/* CTX MENU */
-.ctx{position:fixed;background:var(--bg-elevated);border:1px solid var(--border-dim);border-radius:10px;padding:5px;z-index:999;min-width:160px;box-shadow:0 12px 32px rgba(0,0,0,0.5);display:none}
-.ctx.on{display:block}
-.cxi{padding:8px 12px;border-radius:6px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:9px;color:var(--fg-secondary);transition:var(--tr)}
-.cxi:hover{background:var(--bg-hover);color:var(--fg-primary)}
-.cxs{height:1px;background:var(--border-dim);margin:4px 0}
+    /* ── ERROR SCREEN ─────────────────────────────────── */
+    .error-screen {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 41;
+      text-align: center;
+      padding: 40px;
+    }
+    .error-screen.show { display: flex; }
+    .error-icon { font-size: 48px; margin-bottom: 4px; }
+    .error-screen h2 { font-size: 20px; font-weight: 800; }
+    .error-screen p { color: var(--sub); font-size: 13px; max-width: 340px; line-height: 1.6; }
+    .retry-btn {
+      background: var(--accent); border: none; color: #fff;
+      padding: 9px 22px; border-radius: 8px; font-weight: 700;
+      font-family: var(--font); cursor: pointer; font-size: 13px;
+      margin-top: 6px; transition: background .15s;
+    }
+    .retry-btn:hover { background: #7d55ff; }
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.win>*{animation:fadeUp 0.4s ease both}
-.win>*:nth-child(1){animation-delay:0s}.win>*:nth-child(2){animation-delay:.05s}.win>*:nth-child(3){animation-delay:.1s}.win>*:nth-child(4){animation-delay:.12s}.win>*:nth-child(5){animation-delay:.16s}.win>*:nth-child(6){animation-delay:.2s}
-</style>
+    /* ── WELCOME ──────────────────────────────────────── */
+    .welcome {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      z-index: 30;
+      padding: 32px 20px;
+      overflow-y: auto;
+    }
+
+    .welcome-logo {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--accent), #a066ff);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; font-weight: 900;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 32px rgba(110,65,255,0.35);
+    }
+
+    .welcome h1 { font-size: 26px; font-weight: 900; margin-bottom: 6px; }
+    .welcome .sub-head { color: var(--sub); font-size: 13px; margin-bottom: 28px; font-weight: 500; }
+
+    /* shortcuts grid */
+    .shortcuts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 28px;
+    }
+
+    .shortcut {
+      background: var(--row);
+      border: 1px solid var(--bar);
+      border-radius: var(--radius);
+      padding: 16px 10px 14px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color .15s, transform .15s, background .15s;
+    }
+    .shortcut:hover { border-color: var(--accent); transform: translateY(-2px); background: var(--tab-on); }
+    .shortcut:active { transform: scale(0.97); }
+    .shortcut-icon { font-size: 22px; display: block; margin-bottom: 6px; }
+    .shortcut-name { font-size: 11px; color: var(--sub); font-weight: 700; letter-spacing: .3px; }
+
+    /* section label */
+    .section-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--sub);
+      text-transform: uppercase;
+      align-self: flex-start;
+      margin-bottom: 8px;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    /* proxy services */
+    .proxies {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .proxy-row {
+      background: var(--row);
+      border: 1px solid var(--bar);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .proxy-row:hover { border-color: var(--accent); background: var(--tab-on); }
+
+    .proxy-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--on);
+      flex-shrink: 0;
+    }
+    .proxy-dot.warn { background: #f0a030; }
+
+    .proxy-name { font-size: 13px; font-weight: 700; }
+    .proxy-desc { font-size: 11px; color: var(--sub); font-weight: 500; margin-left: auto; }
+
+    /* ── SETTINGS PANEL ───────────────────────────────── */
+    .settings-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 60;
+      display: none;
+      align-items: flex-start;
+      justify-content: flex-end;
+    }
+    .settings-overlay.show { display: flex; }
+
+    .settings-panel {
+      background: var(--row);
+      border-left: 1px solid var(--bar);
+      width: 280px;
+      height: 100%;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+      animation: slideIn .2s ease;
+    }
+    @keyframes slideIn { from { transform: translateX(40px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-close {
+      background: none; border: none; color: var(--sub);
+      cursor: pointer; font-size: 18px; line-height: 1;
+      transition: color .15s;
+    }
+    .panel-close:hover { color: var(--text); }
+
+    .panel-sep {
+      height: 1px; background: var(--bar);
+    }
+
+    .setting-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .setting-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sub);
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    .setting-select, .setting-input {
+      background: var(--tab-bg);
+      border: 1px solid var(--bar);
+      border-radius: 7px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font);
+      font-weight: 600;
+      outline: none;
+      width: 100%;
+      transition: border-color .15s;
+    }
+    .setting-select:focus, .setting-input:focus { border-color: var(--accent); }
+    .setting-select option { background: var(--row); }
+
+    /* toggle row in settings */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toggle-lbl { font-size: 13px; font-weight: 700; color: var(--text); }
+    .toggle-sub { font-size: 11px; color: var(--sub); font-weight: 500; margin-top: 1px; }
+    .toggle-left { display: flex; flex-direction: column; }
+
+    .toggle-track {
+      width: 40px; height: 20px;
+      border-radius: 10px;
+      background: var(--off);
+      position: relative;
+      cursor: pointer;
+      transition: background .15s;
+      flex-shrink: 0;
+      border: none;
+    }
+    .toggle-track.on { background: var(--on); }
+    .toggle-knob {
+      position: absolute;
+      width: 14px; height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px; left: 3px;
+      transition: left .15s;
+      pointer-events: none;
+    }
+    .toggle-track.on .toggle-knob { left: 23px; }
+
+    /* accent color swatches */
+    .swatch-row {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .swatch {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color .15s, transform .15s;
+    }
+    .swatch:hover   { transform: scale(1.15); }
+    .swatch.active  { border-color: #fff; }
+
+    /* ── STATUS BAR ───────────────────────────────────── */
+    .status-bar {
+      height: 22px;
+      background: var(--tab-bg);
+      border-top: 1px solid var(--bar);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .status-item {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--sub);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--on);
+    }
+  </style>
 </head>
 <body>
 
-<div class="tab-bar" id="tabBar">
-  <button class="add-tab" id="addTab" title="New tab (Ctrl+T)">
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 1v10M1 6h10"/></svg>
+<!-- CHROME -->
+<div class="chrome">
+  <div class="brand">Yllx</div>
+  <div class="sep"></div>
+
+  <button class="nav-btn" id="backBtn" title="Back" disabled>
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+  </button>
+  <button class="nav-btn" id="forwardBtn" title="Forward" disabled>
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+  <button class="nav-btn" id="refreshBtn" title="Refresh">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+  </button>
+  <button class="nav-btn" id="homeBtn" title="Home">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </button>
+
+  <div class="url-wrap">
+    <span class="url-icon">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </span>
+    <input type="text" class="url-bar" id="urlInput" placeholder="Search or enter a URL..." autocomplete="off" spellcheck="false">
+  </div>
+
+  <button class="go-btn" id="goBtn">Go</button>
+  <button class="settings-btn" id="settingsBtn" title="Settings">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
   </button>
 </div>
 
-<div class="navbar">
-  <div class="brand"><div class="brand-icon" id="bicon">Y</div>Yllx</div>
-  <div class="vd"></div>
-  <div class="ng">
-    <button class="nb" id="homeBtn" title="Home (Alt+Home)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
-    <button class="nb" id="backBtn" title="Back (Alt+←)" disabled><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
-    <button class="nb" id="fwdBtn" title="Forward (Alt+→)" disabled><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-    <button class="nb" id="reloadBtn" title="Reload (Ctrl+R)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></button>
-  </div>
-  <div class="uw">
-    <div class="ui">
-      <div class="ulock" id="ulock"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-      <input class="uinput" id="uinput" type="text" placeholder="Search or enter address..." autocomplete="off" spellcheck="false"/>
-      <button class="star" id="starBtn" title="Bookmark (Ctrl+D)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
-      <button class="gobtn" id="goBtn">Go</button>
-    </div>
-  </div>
-  <div class="ng">
-    <button class="ab" id="bmBtn" title="Bookmarks (Ctrl+B)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><div class="badge" id="bmBadge"></div></button>
-    <button class="ab" id="dlBtn" title="Downloads"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg><div class="badge" id="dlBadge"></div></button>
-    <button class="ab" id="settingsBtn" title="Settings (Ctrl+,)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
-  </div>
-</div>
+<!-- MAIN -->
+<div class="main">
 
-<div class="content" id="content">
-  <div class="progress"><div class="pfill" id="pfill"></div></div>
-  <div class="frames" id="frames"></div>
-  <div class="loader" id="loader"><div class="lring"></div><div class="ltxt" id="ltxt">Connecting...</div></div>
-  <div class="sbar"><div class="si"><div class="sdot" id="sdot"></div><span id="stxt">Ready</span></div><div class="surl" id="surl">Yllx Secure Browser</div></div>
-  <div class="backdrop" id="backdrop"></div>
-
-  <!-- BOOKMARKS PANEL -->
-  <div class="panel" id="bmPanel">
-    <div class="ph"><div class="pt">Bookmarks</div><button class="pc" id="bmClose"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-    <div class="pb" id="bmBody"></div>
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text" id="loaderText">Loading...</div>
   </div>
 
-  <!-- DOWNLOADS PANEL -->
-  <div class="panel" id="dlPanel">
-    <div class="ph"><div class="pt">Downloads</div><button class="pc" id="dlClose"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-    <div class="pb" id="dlBody"></div>
+  <!-- Error -->
+  <div class="error-screen" id="errorScreen">
+    <div class="error-icon">⚠️</div>
+    <h2>Couldn't load page</h2>
+    <p id="errorMsg">The site may be blocking proxies, or the URL is invalid. Try a different proxy service in Settings.</p>
+    <button class="retry-btn" id="retryBtn">Try Again</button>
   </div>
 
-  <!-- SETTINGS PANEL -->
-  <div class="panel" id="settingsPanel">
-    <div class="ph"><div class="pt">Settings</div><button class="pc" id="settingsClose"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-    <div class="pb">
-      <div class="ss"><div class="ssl">Theme</div><div class="tg" id="themeGrid"></div></div>
-      <div class="ss">
-        <div class="ssl">General</div>
-        <div class="sr"><span class="slbl">Home page</span><input class="sinput" id="homeInput" type="text" value="https://www.youtube.com" placeholder="URL..."/></div>
-        <div class="sr"><span class="slbl">Search engine</span><select class="ssel" id="searchSel"><option value="yt">YouTube</option><option value="google">Google</option><option value="bing">Bing</option><option value="ddg">DuckDuckGo</option></select></div>
-        <div class="sr"><span class="slbl">New tab</span><select class="ssel" id="ntpSel"><option value="welcome">Dashboard</option><option value="blank">Blank</option><option value="home">Home page</option></select></div>
+  <!-- Welcome -->
+  <div class="welcome" id="welcomeScreen">
+    <div class="welcome-logo">Y</div>
+    <h1>Browse Freely</h1>
+    <p class="sub-head">YouTube, Google, TikTok and more — unblocked.</p>
+
+    <div class="shortcuts">
+      <div class="shortcut" data-url="https://www.youtube.com">
+        <span class="shortcut-icon">▶️</span>
+        <span class="shortcut-name">YouTube</span>
       </div>
-      <div class="ss">
-        <div class="ssl">Privacy & Data</div>
-        <button class="dbtn" id="clrBm">Clear Bookmarks</button>
-        <button class="dbtn" id="clrHist">Clear History</button>
-        <button class="dbtn" id="clrAll">Clear All Data</button>
+      <div class="shortcut" data-url="https://www.google.com">
+        <span class="shortcut-icon">🔍</span>
+        <span class="shortcut-name">Google</span>
       </div>
-      <div class="ss">
-        <div class="ssl">About</div>
-        <div class="sr"><span class="slbl">Version</span><span style="font-size:12px;color:var(--fg-secondary)">Yllx 2.0</span></div>
-        <div class="sr"><span class="slbl">Engine</span><span style="font-size:12px;color:var(--fg-secondary)">Proxy + Iframe</span></div>
+      <div class="shortcut" data-url="https://www.tiktok.com">
+        <span class="shortcut-icon">🎵</span>
+        <span class="shortcut-name">TikTok</span>
+      </div>
+      <div class="shortcut" data-url="https://www.reddit.com">
+        <span class="shortcut-icon">💬</span>
+        <span class="shortcut-name">Reddit</span>
+      </div>
+      <div class="shortcut" data-url="https://www.twitch.tv">
+        <span class="shortcut-icon">🟣</span>
+        <span class="shortcut-name">Twitch</span>
+      </div>
+      <div class="shortcut" data-url="https://www.github.com">
+        <span class="shortcut-icon">⚫</span>
+        <span class="shortcut-name">GitHub</span>
       </div>
     </div>
+
+    <div class="section-label">Proxy Services</div>
+    <div class="proxies" id="proxyList">
+      <div class="proxy-row" data-proxy="ultraviolet">
+        <div class="proxy-dot"></div>
+        <div>
+          <div class="proxy-name">Ultraviolet</div>
+        </div>
+        <div class="proxy-desc">Recommended</div>
+      </div>
+      <div class="proxy-row" data-proxy="rammerhead">
+        <div class="proxy-dot"></div>
+        <div>
+          <div class="proxy-name">Rammerhead</div>
+        </div>
+        <div class="proxy-desc">Fast</div>
+      </div>
+      <div class="proxy-row" data-proxy="corrosion">
+        <div class="proxy-dot warn"></div>
+        <div>
+          <div class="proxy-name">Corrosion</div>
+        </div>
+        <div class="proxy-desc">Experimental</div>
+      </div>
+    </div>
   </div>
+
+  <!-- Proxy iframe -->
+  <iframe class="proxy-frame" id="proxyFrame" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
+
+  <!-- Settings panel -->
+  <div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-panel" id="settingsPanel">
+      <div class="panel-title">
+        Settings
+        <button class="panel-close" id="panelClose">✕</button>
+      </div>
+      <div class="panel-sep"></div>
+
+      <div class="setting-row">
+        <div class="setting-label">Proxy Service</div>
+        <select class="setting-select" id="proxySelect">
+          <option value="ultraviolet">Ultraviolet (Recommended)</option>
+          <option value="rammerhead">Rammerhead</option>
+          <option value="corrosion">Corrosion</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">Search Engine</div>
+        <select class="setting-select" id="searchSelect">
+          <option value="https://www.google.com/search?q=">Google</option>
+          <option value="https://www.bing.com/search?q=">Bing</option>
+          <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+          <option value="https://search.yahoo.com/search?p=">Yahoo</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">Custom Proxy URL</div>
+        <input type="text" class="setting-input" id="customProxy" placeholder="https://yourproxy.com/service/" spellcheck="false">
+      </div>
+
+      <div class="panel-sep"></div>
+
+      <div class="setting-row">
+        <div class="toggle-row">
+          <div class="toggle-left">
+            <div class="toggle-lbl">Open in New Tab</div>
+            <div class="toggle-sub">Navigate outside the frame</div>
+          </div>
+          <button class="toggle-track" id="newTabToggle">
+            <div class="toggle-knob"></div>
+          </button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="toggle-row">
+          <div class="toggle-left">
+            <div class="toggle-lbl">Dark Frame</div>
+            <div class="toggle-sub">Dark background behind pages</div>
+          </div>
+          <button class="toggle-track on" id="darkFrameToggle">
+            <div class="toggle-knob"></div>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-sep"></div>
+
+      <div class="setting-row">
+        <div class="setting-label">Accent Color</div>
+        <div class="swatch-row" id="swatchRow">
+          <div class="swatch active" data-color="#6e41ff" style="background:#6e41ff"></div>
+          <div class="swatch" data-color="#e02d4a" style="background:#e02d4a"></div>
+          <div class="swatch" data-color="#2dce7a" style="background:#2dce7a"></div>
+          <div class="swatch" data-color="#2d8fff" style="background:#2d8fff"></div>
+          <div class="swatch" data-color="#ff8c00" style="background:#ff8c00"></div>
+          <div class="swatch" data-color="#e040fb" style="background:#e040fb"></div>
+        </div>
+      </div>
+
+      <div class="panel-sep"></div>
+
+      <div class="setting-row">
+        <div class="setting-label">About</div>
+        <div style="font-size:12px;color:var(--sub);font-weight:600;line-height:1.6;">
+          Yllx v1.0<br>
+          Styled after Lags Menu<br>
+          <span style="color:var(--sub);font-size:11px;">Proxy requires a backend server to function. Configure your proxy URL above.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<div class="toast" id="toast"></div>
-<div class="ctx" id="ctx">
-  <div class="cxi" id="cx-tab"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New Tab</div>
-  <div class="cxi" id="cx-reload"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Reload</div>
-  <div class="cxs"></div>
-  <div class="cxi" id="cx-bm"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Bookmark Page</div>
-  <div class="cxi" id="cx-copy"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy URL</div>
-  <div class="cxs"></div>
-  <div class="cxi" id="cx-home"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Go Home</div>
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="status-item"><div class="status-dot" id="statusDot"></div><span id="statusText">Ready</span></div>
+  <div class="status-item" id="proxyLabel">Proxy: Ultraviolet</div>
+  <div class="status-item" id="urlDisplay" style="margin-left:auto;overflow:hidden;max-width:300px;text-overflow:ellipsis;white-space:nowrap;"></div>
 </div>
 
 <script>
-// ══ THEMES ══
-const THEMES = {
-  midnight:{name:'Midnight',bg:'linear-gradient(135deg,#04060d,#0c1220)',ac:'#3b82f6',vars:{'--bg-void':'#04060d','--bg-deep':'#070b14','--bg-surface':'#0c1220','--bg-elevated':'#111827','--accent':'#3b82f6','--accent-bright':'#60a5fa','--accent-dim':'rgba(59,130,246,0.15)','--accent-glow':'rgba(59,130,246,0.3)'}},
-  onyx:{name:'Onyx',bg:'linear-gradient(135deg,#000,#110a18)',ac:'#a855f7',vars:{'--bg-void':'#000000','--bg-deep':'#0a0a0a','--bg-surface':'#111111','--bg-elevated':'#1a1a1a','--accent':'#a855f7','--accent-bright':'#c084fc','--accent-dim':'rgba(168,85,247,0.15)','--accent-glow':'rgba(168,85,247,0.3)'}},
-  ocean:{name:'Ocean',bg:'linear-gradient(135deg,#020c12,#071a28)',ac:'#06b6d4',vars:{'--bg-void':'#020c12','--bg-deep':'#04111c','--bg-surface':'#071a28','--bg-elevated':'#0c2438','--accent':'#06b6d4','--accent-bright':'#22d3ee','--accent-dim':'rgba(6,182,212,0.15)','--accent-glow':'rgba(6,182,212,0.3)'}},
-  forest:{name:'Forest',bg:'linear-gradient(135deg,#030a05,#0a180d)',ac:'#22c55e',vars:{'--bg-void':'#030a05','--bg-deep':'#060f08','--bg-surface':'#0a180d','--bg-elevated':'#102215','--accent':'#22c55e','--accent-bright':'#4ade80','--accent-dim':'rgba(34,197,94,0.15)','--accent-glow':'rgba(34,197,94,0.3)'}},
-  ember:{name:'Ember',bg:'linear-gradient(135deg,#0d0806,#1c110b)',ac:'#f97316',vars:{'--bg-void':'#0d0806','--bg-deep':'#130c08','--bg-surface':'#1c110b','--bg-elevated':'#271810','--accent':'#f97316','--accent-bright':'#fb923c','--accent-dim':'rgba(249,115,22,0.15)','--accent-glow':'rgba(249,115,22,0.3)'}}
-};
-const ENGINES = {yt:q=>`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`,google:q=>`https://www.google.com/search?q=${encodeURIComponent(q)}`,bing:q=>`https://www.bing.com/search?q=${encodeURIComponent(q)}`,ddg:q=>`https://duckduckgo.com/?q=${encodeURIComponent(q)}`};
+  // ── STATE ──────────────────────────────────────────────────────────────────
+  const state = {
+    proxy: 'ultraviolet',
+    searchEngine: 'https://www.google.com/search?q=',
+    customProxy: '',
+    newTab: false,
+    darkFrame: true,
+    history: [],
+    historyIndex: -1,
+    currentUrl: '',
+    loading: false,
+  };
 
-// ══ STATE ══
-let settings={homeUrl:'https://www.youtube.com',searchEngine:'yt',ntpMode:'welcome',theme:'midnight'};
-let bookmarks=[];
-let activePanel=null;
-let curTheme='midnight';
-let tabCtr=0;
-let tabs=[];
-let activeTab=null;
-let ptimer=null;
+  // ── ELEMENTS ───────────────────────────────────────────────────────────────
+  const urlInput       = document.getElementById('urlInput');
+  const goBtn          = document.getElementById('goBtn');
+  const backBtn        = document.getElementById('backBtn');
+  const forwardBtn     = document.getElementById('forwardBtn');
+  const refreshBtn     = document.getElementById('refreshBtn');
+  const homeBtn        = document.getElementById('homeBtn');
+  const settingsBtn    = document.getElementById('settingsBtn');
+  const proxyFrame     = document.getElementById('proxyFrame');
+  const welcomeScreen  = document.getElementById('welcomeScreen');
+  const loader         = document.getElementById('loader');
+  const loaderText     = document.getElementById('loaderText');
+  const errorScreen    = document.getElementById('errorScreen');
+  const retryBtn       = document.getElementById('retryBtn');
+  const settingsOverlay= document.getElementById('settingsOverlay');
+  const panelClose     = document.getElementById('panelClose');
+  const proxySelect    = document.getElementById('proxySelect');
+  const searchSelect   = document.getElementById('searchSelect');
+  const customProxyIn  = document.getElementById('customProxy');
+  const newTabToggle   = document.getElementById('newTabToggle');
+  const darkFrameToggle= document.getElementById('darkFrameToggle');
+  const swatchRow      = document.getElementById('swatchRow');
+  const statusDot      = document.getElementById('statusDot');
+  const statusText     = document.getElementById('statusText');
+  const proxyLabel     = document.getElementById('proxyLabel');
+  const urlDisplay     = document.getElementById('urlDisplay');
 
-function h(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function dom(id){return document.getElementById(id)}
-function getDomain(url){try{return new URL(url).hostname.replace(/^www\./,'')}catch{return url}}
-
-// ══ SETTINGS ══
-function loadSettings(){try{Object.assign(settings,JSON.parse(localStorage.getItem('yllx_cfg')||'{}'))}catch{}}
-function saveSettings(){localStorage.setItem('yllx_cfg',JSON.stringify(settings))}
-function loadBookmarks(){try{bookmarks=JSON.parse(localStorage.getItem('yllx_bm')||'[]')}catch{bookmarks=[]}}
-function saveBookmarks(){localStorage.setItem('yllx_bm',JSON.stringify(bookmarks))}
-
-// ══ THEME ══
-function applyTheme(key,save=true){
-  const t=THEMES[key];if(!t)return;curTheme=key;
-  const r=document.documentElement.style;
-  Object.entries(t.vars).forEach(([k,v])=>r.setProperty(k,v));
-  dom('bicon').style.background=`linear-gradient(135deg,${t.ac},${t.vars['--accent-bright']})`;
-  dom('bicon').style.boxShadow=`0 0 10px ${t.vars['--accent-glow']}`;
-  if(save){settings.theme=key;saveSettings()}
-  renderThemeGrid();
-  renderTabs();
-}
-function renderThemeGrid(){
-  const g=dom('themeGrid');
-  g.innerHTML=Object.entries(THEMES).map(([k,t])=>`
-    <div class="tsw${curTheme===k?' sel':''}" data-t="${k}" style="background:${t.bg};border-color:${curTheme===k?'rgba(255,255,255,0.8)':'transparent'}">
-      <div style="width:11px;height:11px;border-radius:50%;background:${t.ac};box-shadow:0 0 6px ${t.ac}66;margin-bottom:5px"></div>
-      <span class="tsn">${t.name}</span>
-    </div>`).join('');
-  g.querySelectorAll('.tsw').forEach(el=>el.addEventListener('click',()=>{applyTheme(el.dataset.t);toast('Theme: '+THEMES[el.dataset.t].name)}));
-}
-
-// ══ PROGRESS ══
-function startProgress(){
-  dom('pfill').style.width='0%';
-  let p=0;clearInterval(ptimer);
-  ptimer=setInterval(()=>{p+=p<30?8:p<60?4:p<85?1.5:0.3;dom('pfill').style.width=Math.min(p,92)+'%';if(p>=92)clearInterval(ptimer)},80);
-}
-function finishProgress(){
-  clearInterval(ptimer);dom('pfill').style.width='100%';
-  setTimeout(()=>{dom('pfill').style.width='0%'},350);
-}
-
-// ══ URL ══
-function processUrl(raw){
-  let url=raw.trim();if(!url)return null;
-  if(url.startsWith('http://')||url.startsWith('https://'))return url;
-  if(url.includes('.')&&!url.includes(' ')&&!url.startsWith('/'))return'https://'+url;
-  return ENGINES[settings.searchEngine](url);
-}
-
-// ══ TABS ══
-function buildWelcome(tid){
-  const d=document.createElement('div');d.className='wsc';
-  d.innerHTML=`<div class="win">
-    <div class="wlogo"><span class="wl">Y</span></div>
-    <h1 class="wt">Browse Freely</h1>
-    <p class="ws">Fast, private, unrestricted access to the web.</p>
-    <div class="sclbl">Quick Access</div>
-    <div class="shortcuts">
-      <div class="sc" data-url="https://www.youtube.com"><div class="sci" style="background:rgba(255,0,0,0.1)"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#ff4444" d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="white"/></svg></div><span class="scn">YouTube</span></div>
-      <div class="sc" data-url="https://www.tiktok.com"><div class="sci" style="background:rgba(0,242,234,0.08)"><svg width="20" height="20" viewBox="0 0 24 24" fill="#00f2ea"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.77 0 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 100 12.63 6.34 6.34 0 006.33-6.34V8.73a8.19 8.19 0 004.79 1.52V6.79a4.85 4.85 0 01-1.01-.1z"/></svg></div><span class="scn">TikTok</span></div>
-      <div class="sc" data-url="https://www.google.com"><div class="sci" style="background:rgba(66,133,244,0.1)"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34A21.991 21.991 0 002 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg></div><span class="scn">Google</span></div>
-      <div class="sc" data-url="https://www.reddit.com"><div class="sci" style="background:rgba(255,69,0,0.1)"><svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#FF4500"/><path fill="white" d="M20 12a2 2 0 00-3.37-1.45A9.86 9.86 0 0012 9.22a.28.28 0 01-.24-.34l.59-2.78 1.91.4a1.5 1.5 0 103.07-.17 1.5 1.5 0 00-2.13 1.08l-2.13-.44a.28.28 0 00-.33.21l-.67 3.13a9.86 9.86 0 00-4.53 1.34A2 2 0 004 12a2 2 0 001.13 1.8 3.36 3.36 0 000 .45c0 2.27 2.64 4.1 5.89 4.1s5.89-1.83 5.89-4.1a3.36 3.36 0 000-.45A2 2 0 0020 12zm-11 1.5a1 1 0 111 1 1 1 0 01-1-1zm5.58 2.71a3.58 3.58 0 01-2.58.85 3.58 3.58 0 01-2.58-.85.2.2 0 01.27-.28 3.26 3.26 0 002.31.74 3.26 3.26 0 002.31-.74.2.2 0 01.27.28zm-.08-1.71a1 1 0 111-1 1 1 0 01-1 1z"/></svg></div><span class="scn">Reddit</span></div>
-    </div>
-    <div class="hints">
-      <div class="hint"><span class="kbd">Ctrl+T</span><span>new tab</span></div>
-      <div class="hint"><span class="kbd">Ctrl+W</span><span>close</span></div>
-      <div class="hint"><span class="kbd">Alt+←/→</span><span>back/fwd</span></div>
-      <div class="hint"><span class="kbd">Ctrl+D</span><span>bookmark</span></div>
-    </div>
-  </div>`;
-  d.querySelectorAll('.sc').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.url)));
-  return d;
-}
-
-function createTab(url=null,sw=true){
-  const id=++tabCtr;
-  const iframe=document.createElement('iframe');
-  iframe.className='pf';iframe.setAttribute('sandbox','allow-same-origin allow-scripts allow-popups allow-forms');
-  const welcome=buildWelcome(id);
-  dom('frames').appendChild(iframe);
-  dom('frames').appendChild(welcome);
-  const tab={id,title:'New Tab',url:'',hist:[],hIdx:-1,iframe,welcome,loading:false};
-  tabs.push(tab);
-  if(sw)switchTab(id);
-  if(url)navigate(url,id);
-  return id;
-}
-
-function switchTab(id){
-  tabs.forEach(t=>{t.iframe.classList.remove('act');t.welcome.classList.add('hid')});
-  activeTab=id;
-  const tab=getTab(id);if(!tab)return;
-  dom('loader').className='loader'+(tab.loading?' on':'');
-  if(!tab.loading){
-    if(tab.url){tab.iframe.classList.add('act')}
-    else{tab.welcome.classList.remove('hid')}
-  }
-  renderTabs();updateNavBtns();syncUrlBar();updateStar();updateStatus();
-}
-
-function closeTab(id,e){
-  e&&e.stopPropagation();
-  const idx=tabs.findIndex(t=>t.id===id);if(idx<0)return;
-  const tab=tabs[idx];tab.iframe.remove();tab.welcome.remove();tabs.splice(idx,1);
-  if(!tabs.length){createTab();return}
-  if(activeTab===id)switchTab(tabs[Math.min(idx,tabs.length-1)].id);
-  else renderTabs();
-}
-
-function getTab(id){return tabs.find(t=>t.id===id)}
-function getActive(){return getTab(activeTab)}
-
-function renderTabs(){
-  const bar=dom('tabBar'),btn=dom('addTab');
-  bar.querySelectorAll('.tab').forEach(el=>el.remove());
-  const ac=THEMES[curTheme].ac;
-  tabs.forEach(tab=>{
-    const el=document.createElement('div');el.className='tab'+(tab.id===activeTab?' active':'');
-    el.innerHTML=`<div class="tab-dot" style="background:${tab.url?ac:'var(--fg-muted)'}"></div><span class="tab-name">${h(tab.title)}</span><div class="tab-x"><svg width="7" height="7" viewBox="0 0 7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l5 5M6 1L1 6"/></svg></div>`;
-    el.addEventListener('click',()=>switchTab(tab.id));
-    el.querySelector('.tab-x').addEventListener('click',e=>closeTab(tab.id,e));
-    bar.insertBefore(el,btn);
-  });
-}
-
-// ══ NAVIGATION ══
-function navigate(rawUrl,tid){
-  const url=processUrl(rawUrl);if(!url)return;
-  const tabId=tid||activeTab;
-  const tab=getTab(tabId);if(!tab)return;
-  tab.hist=tab.hist.slice(0,tab.hIdx+1);tab.hist.push(url);tab.hIdx=tab.hist.length-1;
-  tab.url=url;tab.title=getDomain(url);tab.loading=true;
-  const isAct=tabId===activeTab;
-  if(isAct){
-    dom('uinput').value=url;dom('surl').textContent=url;
-    const sec=url.startsWith('https://');
-    dom('sdot').className='sdot'+(sec?' sec':'');dom('ulock').className='ulock'+(sec?' sec':'');
-    dom('ltxt').textContent='Connecting to '+getDomain(url)+'…';
-    dom('loader').classList.add('on');tab.iframe.classList.remove('act');tab.welcome.classList.add('hid');
-    startProgress();updateNavBtns();updateStar();
-  }
-  renderTabs();
-  tab.iframe.src='/proxy/'+url;
-  tab.iframe.onload=()=>{
-    tab.loading=false;
-    try{const t=tab.iframe.contentDocument&&tab.iframe.contentDocument.title;if(t)tab.title=t}catch(e){}
-    if(tabId===activeTab){
-      dom('loader').classList.remove('on');tab.iframe.classList.add('act');
-      finishProgress();dom('stxt').textContent=getDomain(url);
+  // ── URL PROCESSING ─────────────────────────────────────────────────────────
+  function processUrl(input) {
+    let url = input.trim();
+    if (!url) return null;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      if (url.includes('.') && !url.includes(' ')) {
+        url = 'https://' + url;
+      } else {
+        url = state.searchEngine + encodeURIComponent(url);
+      }
     }
-    renderTabs();
-  };
-  tab.iframe.onerror=()=>{
-    tab.loading=false;
-    if(tabId===activeTab){dom('loader').classList.remove('on');dom('stxt').textContent='Failed'}
-  };
-}
+    return url;
+  }
 
-function loadUrl(tab,url,pushHist=false){
-  if(pushHist){tab.hist=tab.hist.slice(0,tab.hIdx+1);tab.hist.push(url);tab.hIdx=tab.hist.length-1}
-  tab.url=url;tab.title=getDomain(url);tab.loading=true;
-  dom('uinput').value=url;dom('surl').textContent=url;
-  const sec=url.startsWith('https://');
-  dom('sdot').className='sdot'+(sec?' sec':'');dom('ulock').className='ulock'+(sec?' sec':'');
-  dom('ltxt').textContent='Loading…';dom('loader').classList.add('on');
-  tab.iframe.classList.remove('act');startProgress();
-  tab.iframe.src='/proxy/'+url;
-  tab.iframe.onload=()=>{
-    tab.loading=false;dom('loader').classList.remove('on');tab.iframe.classList.add('act');
-    finishProgress();dom('stxt').textContent=getDomain(url);updateNavBtns();updateStar();renderTabs();
-  };
-}
+  function buildProxyUrl(url) {
+    if (state.customProxy) return state.customProxy + encodeURIComponent(url);
+    const prefixes = {
+      ultraviolet: '/service/uv/',
+      rammerhead:  '/service/rh/',
+      corrosion:   '/service/co/',
+    };
+    return (prefixes[state.proxy] || '/proxy/') + encodeURIComponent(url);
+  }
 
-function goBack(){const tab=getActive();if(!tab||tab.hIdx<=0)return;tab.hIdx--;loadUrl(tab,tab.hist[tab.hIdx]);updateNavBtns()}
-function goFwd(){const tab=getActive();if(!tab||tab.hIdx>=tab.hist.length-1)return;tab.hIdx++;loadUrl(tab,tab.hist[tab.hIdx]);updateNavBtns()}
-function reload(){const tab=getActive();if(!tab||!tab.url)return;loadUrl(tab,tab.url)}
-function goHome(){navigate(settings.homeUrl)}
+  // ── NAVIGATION ─────────────────────────────────────────────────────────────
+  function setStatus(text, online = true) {
+    statusText.textContent = text;
+    statusDot.style.background = online ? 'var(--on)' : 'var(--off)';
+  }
 
-function updateNavBtns(){
-  const tab=getActive();
-  dom('backBtn').disabled=!tab||tab.hIdx<=0;
-  dom('fwdBtn').disabled=!tab||tab.hIdx>=tab.hist.length-1;
-}
+  function updateNavButtons() {
+    backBtn.disabled    = state.historyIndex <= 0;
+    forwardBtn.disabled = state.historyIndex >= state.history.length - 1;
+  }
 
-function syncUrlBar(){
-  const tab=getActive();
-  dom('uinput').value=tab?tab.url:'';
-  dom('surl').textContent=tab&&tab.url?tab.url:'Yllx Secure Browser';
-  const sec=tab&&tab.url&&tab.url.startsWith('https://');
-  dom('sdot').className='sdot'+(sec?' sec':'');
-  dom('ulock').className='ulock'+(sec?' sec':'');
-}
+  function showLoader(text = 'Loading...') {
+    loader.classList.add('show');
+    loaderText.textContent = text;
+    errorScreen.classList.remove('show');
+    welcomeScreen.style.display = 'none';
+    proxyFrame.style.display = 'none';
+    state.loading = true;
+    setStatus('Loading...', true);
+  }
 
-function updateStatus(){const tab=getActive();dom('stxt').textContent=tab&&tab.url?getDomain(tab.url):'Ready'}
+  function hideLoader() {
+    loader.classList.remove('show');
+    state.loading = false;
+  }
 
-// ══ BOOKMARKS ══
-function isBm(url){return bookmarks.some(b=>b.url===url)}
-function toggleBm(){
-  const tab=getActive();if(!tab||!tab.url){toast('Navigate to a page first');return}
-  const url=tab.url,idx=bookmarks.findIndex(b=>b.url===url);
-  if(idx>=0){bookmarks.splice(idx,1);toast('Bookmark removed')}
-  else{bookmarks.unshift({url,title:tab.title||getDomain(url),date:Date.now()});toast('⭐ Bookmarked!')}
-  saveBookmarks();updateStar();updateBmBadge();
-  if(activePanel==='bm')renderBmPanel();
-}
-function updateStar(){const tab=getActive();const on=tab&&tab.url&&isBm(tab.url);dom('starBtn').className='star'+(on?' on':'')}
-function updateBmBadge(){dom('bmBadge').className=bookmarks.length?'badge v':'badge'}
-function renderBmPanel(){
-  const b=dom('bmBody');
-  if(!bookmarks.length){b.innerHTML='<div class="bempty"><div style="font-size:32px;opacity:.4">🔖</div><div style="font-size:13px">No bookmarks yet.<br/>Click ⭐ in the address bar to save pages.</div></div>';return}
-  b.innerHTML=bookmarks.map((bm,i)=>`<div class="bmi" data-i="${i}"><div class="bmd">⭐</div><div class="bmif"><div class="bmin">${h(bm.title)}</div><div class="bmiu">${h(bm.url)}</div></div><button class="bmdel" data-i="${i}"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>`).join('');
-  b.querySelectorAll('.bmi').forEach(el=>{
-    el.addEventListener('click',e=>{if(e.target.closest('.bmdel'))return;navigate(bookmarks[+el.dataset.i].url);closePanel()});
-    el.querySelector('.bmdel').addEventListener('click',e=>{e.stopPropagation();bookmarks.splice(+el.dataset.i,1);saveBookmarks();updateBmBadge();updateStar();renderBmPanel()});
+  function showError(msg) {
+    hideLoader();
+    errorScreen.classList.add('show');
+    document.getElementById('errorMsg').textContent = msg || 'Failed to load page.';
+    setStatus('Error', false);
+  }
+
+  function navigate(rawUrl, addToHistory = true) {
+    const url = processUrl(rawUrl);
+    if (!url) return;
+
+    if (state.newTab) {
+      window.open(url, '_blank');
+      return;
+    }
+
+    state.currentUrl = url;
+    urlInput.value   = url;
+    urlDisplay.textContent = url;
+
+    if (addToHistory) {
+      state.history = state.history.slice(0, state.historyIndex + 1);
+      state.history.push(url);
+      state.historyIndex = state.history.length - 1;
+    }
+    updateNavButtons();
+
+    showLoader('Connecting to ' + (new URL(url).hostname));
+
+    const proxyUrl = buildProxyUrl(url);
+    proxyFrame.src = proxyUrl;
+
+    proxyLabel.textContent = 'Proxy: ' + state.proxy.charAt(0).toUpperCase() + state.proxy.slice(1);
+
+    const timeout = setTimeout(() => {
+      if (state.loading) showError('Timed out. The site may be blocking proxies, or no backend is configured.');
+    }, 12000);
+
+    proxyFrame.onload = () => {
+      clearTimeout(timeout);
+      hideLoader();
+      proxyFrame.style.display = 'block';
+      setStatus('Loaded');
+    };
+
+    proxyFrame.onerror = () => {
+      clearTimeout(timeout);
+      showError('Failed to load. The site may be blocking proxies.');
+    };
+  }
+
+  function goBack() {
+    if (state.historyIndex > 0) {
+      state.historyIndex--;
+      navigate(state.history[state.historyIndex], false);
+    }
+  }
+
+  function goForward() {
+    if (state.historyIndex < state.history.length - 1) {
+      state.historyIndex++;
+      navigate(state.history[state.historyIndex], false);
+    }
+  }
+
+  function refresh() {
+    if (state.currentUrl) navigate(state.currentUrl, false);
+  }
+
+  function goHome() {
+    errorScreen.classList.remove('show');
+    hideLoader();
+    proxyFrame.style.display = 'none';
+    proxyFrame.src = 'about:blank';
+    welcomeScreen.style.display = 'flex';
+    state.currentUrl = '';
+    urlInput.value = '';
+    urlDisplay.textContent = '';
+    setStatus('Ready');
+  }
+
+  // ── EVENTS ─────────────────────────────────────────────────────────────────
+  goBtn.addEventListener('click', () => navigate(urlInput.value));
+  urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') navigate(urlInput.value); });
+
+  backBtn.addEventListener('click', goBack);
+  forwardBtn.addEventListener('click', goForward);
+  refreshBtn.addEventListener('click', refresh);
+  homeBtn.addEventListener('click', goHome);
+  retryBtn.addEventListener('click', () => { errorScreen.classList.remove('show'); refresh(); });
+
+  document.querySelectorAll('.shortcut').forEach(el => {
+    el.addEventListener('click', () => navigate(el.dataset.url));
   });
-}
 
-// ══ DOWNLOADS PANEL ══
-function renderDlPanel(){
-  dom('dlBody').innerHTML='<div class="dlempty"><div style="font-size:32px;opacity:.4">📥</div><div style="font-size:13px;margin-top:8px">No downloads yet.</div><div style="font-size:11px;color:var(--fg-muted);margin-top:4px">Files you download will appear here.</div></div>';
-}
+  document.querySelectorAll('.proxy-row').forEach(el => {
+    el.addEventListener('click', () => {
+      state.proxy = el.dataset.proxy;
+      proxySelect.value = state.proxy;
+      proxyLabel.textContent = 'Proxy: ' + el.querySelector('.proxy-name').textContent;
+      // highlight selected
+      document.querySelectorAll('.proxy-row').forEach(r => r.style.borderColor = '');
+      el.style.borderColor = 'var(--accent)';
+    });
+  });
 
-// ══ PANELS ══
-function openPanel(name){
-  if(activePanel===name){closePanel();return}
-  closePanel(false);activePanel=name;
-  dom('backdrop').classList.add('on');
-  const map={bm:'bmPanel',dl:'dlPanel',settings:'settingsPanel'};
-  const btns={bm:'bmBtn',dl:'dlBtn',settings:'settingsBtn'};
-  Object.keys(map).forEach(k=>{dom(map[k]).classList.remove('open');dom(btns[k]).classList.remove('on')});
-  dom(map[name]).classList.add('open');dom(btns[name]).classList.add('on');
-  if(name==='bm')renderBmPanel();
-  if(name==='dl')renderDlPanel();
-}
-function closePanel(a=true){
-  activePanel=null;dom('backdrop').classList.remove('on');
-  ['bmPanel','dlPanel','settingsPanel'].forEach(id=>dom(id).classList.remove('open'));
-  ['bmBtn','dlBtn','settingsBtn'].forEach(id=>dom(id).classList.remove('on'));
-}
+  // settings
+  settingsBtn.addEventListener('click', () => settingsOverlay.classList.add('show'));
+  panelClose.addEventListener('click',  () => settingsOverlay.classList.remove('show'));
+  settingsOverlay.addEventListener('click', e => {
+    if (e.target === settingsOverlay) settingsOverlay.classList.remove('show');
+  });
 
-// ══ TOAST ══
-let toastT;
-function toast(msg){
-  const t=dom('toast');t.textContent=msg;t.classList.add('on');
-  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2300);
-}
+  proxySelect.addEventListener('change', () => {
+    state.proxy = proxySelect.value;
+    proxyLabel.textContent = 'Proxy: ' + proxySelect.options[proxySelect.selectedIndex].text.split(' ')[0];
+  });
 
-// ══ CONTEXT MENU ══
-const ctx=dom('ctx');
-document.addEventListener('contextmenu',e=>{
-  if(e.target.closest('.frames'))return;
-  e.preventDefault();
-  ctx.style.left=Math.min(e.clientX,window.innerWidth-180)+'px';
-  ctx.style.top=Math.min(e.clientY,window.innerHeight-200)+'px';
-  ctx.classList.add('on');
-});
-document.addEventListener('click',()=>ctx.classList.remove('on'));
-dom('cx-tab').addEventListener('click',()=>createTab());
-dom('cx-reload').addEventListener('click',reload);
-dom('cx-bm').addEventListener('click',toggleBm);
-dom('cx-copy').addEventListener('click',()=>{const tab=getActive();if(tab&&tab.url){navigator.clipboard.writeText(tab.url).catch(()=>{});toast('URL copied!')}});
-dom('cx-home').addEventListener('click',goHome);
+  searchSelect.addEventListener('change', () => { state.searchEngine = searchSelect.value; });
+  customProxyIn.addEventListener('input',  () => { state.customProxy = customProxyIn.value.trim(); });
 
-// ══ EVENT LISTENERS ══
-dom('goBtn').addEventListener('click',()=>navigate(dom('uinput').value));
-dom('uinput').addEventListener('keydown',e=>{if(e.key==='Enter')navigate(e.target.value)});
-dom('uinput').addEventListener('focus',e=>e.target.select());
-dom('homeBtn').addEventListener('click',goHome);
-dom('backBtn').addEventListener('click',goBack);
-dom('fwdBtn').addEventListener('click',goFwd);
-dom('reloadBtn').addEventListener('click',reload);
-dom('starBtn').addEventListener('click',toggleBm);
-dom('bmBtn').addEventListener('click',()=>openPanel('bm'));
-dom('dlBtn').addEventListener('click',()=>openPanel('dl'));
-dom('settingsBtn').addEventListener('click',()=>openPanel('settings'));
-dom('bmClose').addEventListener('click',closePanel);
-dom('dlClose').addEventListener('click',closePanel);
-dom('settingsClose').addEventListener('click',closePanel);
-dom('backdrop').addEventListener('click',closePanel);
-dom('addTab').addEventListener('click',()=>createTab());
-dom('homeInput').addEventListener('input',e=>{settings.homeUrl=e.target.value;saveSettings()});
-dom('searchSel').addEventListener('change',e=>{settings.searchEngine=e.target.value;saveSettings();toast('Search engine updated')});
-dom('ntpSel').addEventListener('change',e=>{settings.ntpMode=e.target.value;saveSettings()});
-dom('clrBm').addEventListener('click',()=>{bookmarks=[];saveBookmarks();updateBmBadge();updateStar();toast('Bookmarks cleared')});
-dom('clrHist').addEventListener('click',()=>{tabs.forEach(t=>{t.hist=[];t.hIdx=-1});updateNavBtns();toast('History cleared')});
-dom('clrAll').addEventListener('click',()=>{bookmarks=[];saveBookmarks();settings={homeUrl:'https://www.youtube.com',searchEngine:'yt',ntpMode:'welcome',theme:'midnight'};saveSettings();updateBmBadge();updateStar();toast('All data cleared')});
+  function makeToggle(btn, key) {
+    btn.addEventListener('click', () => {
+      state[key] = !state[key];
+      btn.classList.toggle('on', state[key]);
+    });
+  }
+  makeToggle(newTabToggle,    'newTab');
+  makeToggle(darkFrameToggle, 'darkFrame');
 
-// ══ KEYBOARD SHORTCUTS ══
-document.addEventListener('keydown',e=>{
-  const ctrl=e.ctrlKey||e.metaKey;
-  if(ctrl&&e.key==='t'){e.preventDefault();createTab()}
-  if(ctrl&&e.key==='w'){e.preventDefault();if(activeTab)closeTab(activeTab)}
-  if(ctrl&&e.key==='r'||e.key==='F5'){e.preventDefault();reload()}
-  if(ctrl&&e.key==='l'){e.preventDefault();dom('uinput').focus();dom('uinput').select()}
-  if(ctrl&&e.key===','){e.preventDefault();openPanel('settings')}
-  if(ctrl&&e.key==='d'){e.preventDefault();toggleBm()}
-  if(ctrl&&e.key==='b'){e.preventDefault();openPanel('bm')}
-  if(e.altKey&&e.key==='ArrowLeft'){e.preventDefault();goBack()}
-  if(e.altKey&&e.key==='ArrowRight'){e.preventDefault();goFwd()}
-  if(e.altKey&&(e.key==='Home'||e.key==='h')){e.preventDefault();goHome()}
-  if(e.key==='Escape'){closePanel();ctx.classList.remove('on')}
-  if(ctrl&&e.key>='1'&&e.key<='9'){const idx=parseInt(e.key)-1;if(tabs[idx]){e.preventDefault();switchTab(tabs[idx].id)}}
-  // Ctrl+Tab to cycle tabs
-  if(ctrl&&e.key==='Tab'){e.preventDefault();const idx=tabs.findIndex(t=>t.id===activeTab);switchTab(tabs[(idx+1)%tabs.length].id)}
-});
+  darkFrameToggle.addEventListener('click', () => {
+    document.querySelector('.main').style.background = state.darkFrame ? '#fff' : 'var(--bg)';
+  });
 
-// ══ INIT ══
-loadSettings();
-loadBookmarks();
-applyTheme(settings.theme||'midnight',false);
-dom('homeInput').value=settings.homeUrl;
-dom('searchSel').value=settings.searchEngine;
-dom('ntpSel').value=settings.ntpMode;
-renderThemeGrid();
-updateBmBadge();
-createTab();
+  // accent color swatches
+  swatchRow.querySelectorAll('.swatch').forEach(sw => {
+    sw.addEventListener('click', () => {
+      swatchRow.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      document.documentElement.style.setProperty('--accent', sw.dataset.color);
+      // derive dim (darker version)
+      document.documentElement.style.setProperty('--dim', sw.dataset.color + 'aa');
+    });
+  });
+
+  // keyboard shortcut: Ctrl+L focuses url bar
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+      e.preventDefault();
+      urlInput.focus();
+      urlInput.select();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+      e.preventDefault();
+      refresh();
+    }
+  });
+
+  // init
+  updateNavButtons();
+  setStatus('Ready');
 </script>
 </body>
 </html>
