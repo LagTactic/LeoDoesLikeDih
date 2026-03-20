@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yllx — Secure Browser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #04060d;
+      --bg-deep: #070b14;
+      --bg-surface: #0c1220;
+      --bg-elevated: #111827;
+      --bg-glass: rgba(14, 22, 42, 0.82);
+      --bg-hover: rgba(255,255,255,0.04);
+      --fg-primary: #e8edf5;
+      --fg-secondary: #6b7a96;
+      --fg-muted: #323d52;
+      --accent: #3b82f6;
+      --accent-dim: rgba(59, 130, 246, 0.15);
+      --accent-glow: rgba(59, 130, 246, 0.35);
+      --accent-bright: #60a5fa;
+      --accent-electric: #1d4ed8;
+      --gold: #f59e0b;
+      --border-dim: rgba(255,255,255,0.055);
+      --border-mid: rgba(59,130,246,0.2);
+      --border-accent: rgba(59,130,246,0.5);
+      --nav-h: 60px;
+      --tab-h: 40px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-void);
+      color: var(--fg-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Tab Bar ───────────────────────────────────────── */
+    .tab-bar {
+      height: var(--tab-h);
+      background: var(--bg-deep);
+      border-bottom: 1px solid var(--border-dim);
+      display: flex;
+      align-items: flex-end;
+      padding: 0 12px;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .tab {
+      height: 32px;
+      padding: 0 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      color: var(--fg-secondary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+      max-width: 200px;
+    }
+
+    .tab.active {
+      background: var(--bg-surface);
+      border-color: var(--border-dim);
+      color: var(--fg-primary);
+    }
+
+    .tab-favicon {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      background: var(--fg-muted);
+      flex-shrink: 0;
+    }
+
+    .tab-title { overflow: hidden; text-overflow: ellipsis; }
+
+    .tab-close {
+      margin-left: auto;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .tab:hover .tab-close { opacity: 1; }
+    .tab-close:hover { background: rgba(255,255,255,0.12); }
+
+    .new-tab-btn {
+      height: 28px;
+      width: 28px;
+      border: none;
+      background: transparent;
+      color: var(--fg-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+      margin-bottom: 2px;
+    }
+    .new-tab-btn:hover { background: var(--bg-hover); color: var(--fg-primary); }
+
+    /* ── Navigation Bar ─────────────────────────────────── */
+    .navbar {
+      height: var(--nav-h);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-dim);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 10px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    /* subtle grid lines in navbar */
+    .navbar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+
+    .brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+      color: var(--fg-primary);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-icon {
+      width: 26px;
+      height: 26px;
+      background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: white;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .nav-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border-dim);
+      flex-shrink: 0;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--fg-muted);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .nav-btn:hover { background: var(--bg-hover); color: var(--fg-primary); }
+    .nav-btn:active { transform: scale(0.9); }
+    .nav-btn svg { pointer-events: none; }
+
+    /* ── URL Bar ──────────────────────────────────────── */
+    .url-bar-wrap {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .url-bar-inner {
+      display: flex;
+      align-items: center;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-dim);
+      border-radius: 10px;
+      padding: 0 12px;
+      gap: 8px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .url-bar-wrap:focus-within .url-bar-inner {
+      border-color: var(--border-accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .url-scheme {
+      font-size: 12px;
+      color: var(--accent-bright);
+      font-weight: 500;
+      flex-shrink: 0;
+      display: none;
+    }
+
+    .lock-icon {
+      color: var(--fg-muted);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .url-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--fg-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      padding: 9px 0;
+      min-width: 0;
+    }
+
+    .url-input::placeholder { color: var(--fg-muted); }
+
+    .url-input::selection { background: var(--accent-dim); }
+
+    .go-btn {
+      background: var(--accent);
+      border: none;
+      padding: 7px 18px;
+      border-radius: 7px;
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      flex-shrink: 0;
+      letter-spacing: 0.01em;
+    }
+    .go-btn:hover { background: var(--accent-bright); box-shadow: 0 0 16px var(--accent-glow); }
+    .go-btn:active { transform: scale(0.96); }
+
+    /* ── Toolbar ──────────────────────────────────────── */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--fg-muted);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .action-btn:hover { background: var(--bg-hover); color: var(--fg-primary); }
+
+    /* ── Content Area ─────────────────────────────────── */
+    .content-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+      width: 0%;
+      z-index: 200;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 8px var(--accent-glow);
+      display: none;
+    }
+
+    .proxy-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+      background: #fff;
+    }
+
+    /* ── Welcome Screen ───────────────────────────────── */
+    .welcome {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-void);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      overflow-y: auto;
+    }
+
+    /* Ambient glow backdrop */
+    .welcome::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(ellipse, rgba(59,130,246,0.07) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -60%);
+      pointer-events: none;
+    }
+
+    /* Dot grid */
+    .welcome::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    .welcome-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .welcome-logo-wrap {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #60a5fa 100%);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+      position: relative;
+      box-shadow: 0 0 40px rgba(59,130,246,0.3), 0 0 80px rgba(59,130,246,0.1);
+    }
+
+    .welcome-logo-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 19px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 60%);
+      pointer-events: none;
+    }
+
+    .welcome-logo-letter {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 28px;
+      color: white;
+      letter-spacing: -1px;
+    }
+
+    .welcome-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      color: var(--fg-primary);
+      letter-spacing: -0.8px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .welcome-sub {
+      font-size: 14px;
+      color: var(--fg-secondary);
+      margin-bottom: 48px;
+      text-align: center;
+      font-weight: 300;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Shortcut Grid ────────────────────────────────── */
+    .shortcuts-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+      align-self: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .shortcuts {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      width: 100%;
+      margin-bottom: 40px;
+    }
+
+    .shortcut {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dim);
+      border-radius: 14px;
+      padding: 20px 16px;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shortcut::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    }
+
+    .shortcut:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-mid);
+      background: var(--bg-elevated);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px var(--border-mid);
+    }
+
+    .shortcut-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .shortcut-name {
+      font-size: 12px;
+      color: var(--fg-secondary);
+      font-weight: 400;
+    }
+
+    /* ── Status Bar ───────────────────────────────────── */
+    .status-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 22px;
+      background: var(--bg-deep);
+      border-top: 1px solid var(--border-dim);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 16px;
+      z-index: 100;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: var(--fg-muted);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--fg-muted);
+    }
+
+    .status-dot.secure {
+      background: #22c55e;
+      box-shadow: 0 0 4px rgba(34,197,94,0.5);
+    }
+
+    .status-text-right {
+      margin-left: auto;
+      font-size: 10px;
+      color: var(--fg-muted);
+    }
+
+    /* ── Loader ────────────────────────────────────────── */
+    .loader-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-deep);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 50;
+    }
+
+    .loader-ring {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--border-dim);
+      border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loader-text {
+      font-size: 13px;
+      color: var(--fg-secondary);
+      font-weight: 300;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Keyboard shortcut badges ─────────────────────── */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-dim);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 10px;
+      color: var(--fg-muted);
+      font-family: 'DM Sans', monospace;
+    }
+
+    /* ── Spotlight search hint ────────────────────────── */
+    .search-hint {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--fg-muted);
+    }
+
+    .search-hint-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* ── Animations ───────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .welcome-content > * {
+      animation: fadeUp 0.5s ease both;
+    }
+    .welcome-content > *:nth-child(1) { animation-delay: 0s; }
+    .welcome-content > *:nth-child(2) { animation-delay: 0.05s; }
+    .welcome-content > *:nth-child(3) { animation-delay: 0.1s; }
+    .welcome-content > *:nth-child(4) { animation-delay: 0.15s; }
+    .welcome-content > *:nth-child(5) { animation-delay: 0.2s; }
+    .welcome-content > *:nth-child(6) { animation-delay: 0.25s; }
+
+    /* ── Scrollbar ────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--fg-muted); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--fg-secondary); }
+  </style>
+</head>
+<body>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab active" id="mainTab">
+      <div class="tab-favicon" id="tabFavicon"></div>
+      <span class="tab-title" id="tabTitle">New Tab</span>
+      <div class="tab-close">
+        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+          <path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <button class="new-tab-btn" title="New Tab">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <div class="brand">
+      <div class="brand-icon">Y</div>
+      Yllx
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-controls">
+      <button class="nav-btn" id="backBtn" title="Go back">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <button class="nav-btn" id="forwardBtn" title="Go forward">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+      <button class="nav-btn" id="reloadBtn" title="Reload">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M1 4v6h6M23 20v-6h-6"/>
+          <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="url-bar-wrap">
+      <div class="url-bar-inner">
+        <div class="lock-icon" id="lockIcon">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+        </div>
+        <input type="text" class="url-input" id="urlInput" placeholder="Search or enter address..." autocomplete="off" spellcheck="false"/>
+        <button class="go-btn" id="goBtn">Go</button>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <button class="action-btn" title="Bookmarks">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+        </svg>
+      </button>
+      <button class="action-btn" title="Downloads">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+      </button>
+      <button class="action-btn" title="Settings">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content-area">
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Loader -->
+    <div class="loader-overlay" id="loaderOverlay">
+      <div class="loader-ring"></div>
+      <div class="loader-text" id="loaderText">Connecting...</div>
+    </div>
+
+    <!-- Welcome Screen -->
+    <div class="welcome" id="welcomeScreen">
+      <div class="welcome-content">
+        <div class="welcome-logo-wrap">
+          <span class="welcome-logo-letter">Y</span>
+        </div>
+
+        <h1 class="welcome-title">Browse Freely</h1>
+        <p class="welcome-sub">Fast, private, unrestricted access to the web.</p>
+
+        <div class="shortcuts-label">Quick Access</div>
+
+        <div class="shortcuts">
+          <div class="shortcut" data-url="https://www.youtube.com">
+            <div class="shortcut-icon-wrap" style="background:rgba(255,0,0,0.1);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#ff4444">
+                <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z"/>
+                <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="white"/>
+              </svg>
+            </div>
+            <span class="shortcut-name">YouTube</span>
+          </div>
+
+          <div class="shortcut" data-url="https://www.tiktok.com">
+            <div class="shortcut-icon-wrap" style="background:rgba(0,242,234,0.08);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#00f2ea">
+                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.73a8.19 8.19 0 004.79 1.52V6.79a4.85 4.85 0 01-1.02-.1z"/>
+              </svg>
+            </div>
+            <span class="shortcut-name">TikTok</span>
+          </div>
+
+          <div class="shortcut" data-url="https://www.google.com">
+            <div class="shortcut-icon-wrap" style="background:rgba(66,133,244,0.1);">
+              <svg width="22" height="22" viewBox="0 0 48 48">
+                <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
+                <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
+                <path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34A21.991 21.991 0 002 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/>
+                <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
+              </svg>
+            </div>
+            <span class="shortcut-name">Google</span>
+          </div>
+
+          <div class="shortcut" data-url="https://www.reddit.com">
+            <div class="shortcut-icon-wrap" style="background:rgba(255,69,0,0.1);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#FF4500">
+                <circle cx="12" cy="12" r="12" fill="#FF4500"/>
+                <path fill="white" d="M20 12a2 2 0 00-3.37-1.45A9.86 9.86 0 0012 9.22a.28.28 0 01-.24-.34l.59-2.78 1.91.4a1.5 1.5 0 103.07-.17 1.5 1.5 0 00-2.13 1.08l-2.13-.44a.28.28 0 00-.33.21l-.67 3.13a9.86 9.86 0 00-4.53 1.34A2 2 0 004 12a2 2 0 001.13 1.8 3.36 3.36 0 000 .45c0 2.27 2.64 4.1 5.89 4.1s5.89-1.83 5.89-4.1a3.36 3.36 0 000-.45A2 2 0 0020 12zm-11 1.5a1 1 0 111 1 1 1 0 01-1-1zm5.58 2.71a3.58 3.58 0 01-2.58.85 3.58 3.58 0 01-2.58-.85.2.2 0 01.27-.28 3.26 3.26 0 002.31.74 3.26 3.26 0 002.31-.74.2.2 0 01.27.28zm-.08-1.71a1 1 0 111-1 1 1 0 01-1 1z"/>
+              </svg>
+            </div>
+            <span class="shortcut-name">Reddit</span>
+          </div>
+        </div>
+
+        <div class="search-hint">
+          <div class="search-hint-item">
+            <span class="kbd">Enter</span>
+            <span>navigate</span>
+          </div>
+          <div class="search-hint-item">
+            <span class="kbd">⌘ L</span>
+            <span>focus address bar</span>
+          </div>
+          <div class="search-hint-item">
+            <span class="kbd">⌘ R</span>
+            <span>reload</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proxy Frame -->
+    <iframe class="proxy-frame" id="proxyFrame" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+
+    <!-- Status Bar -->
+    <div class="status-bar" id="statusBar">
+      <div class="status-indicator">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Ready</span>
+      </div>
+      <div class="status-text-right" id="statusRight">Yllx Secure Browser</div>
+    </div>
+  </div>
+
+  <script>
+    const urlInput = document.getElementById('urlInput');
+    const goBtn = document.getElementById('goBtn');
+    const proxyFrame = document.getElementById('proxyFrame');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const loaderOverlay = document.getElementById('loaderOverlay');
+    const loaderText = document.getElementById('loaderText');
+    const progressBar = document.getElementById('progressBar');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const statusRight = document.getElementById('statusRight');
+    const tabTitle = document.getElementById('tabTitle');
+    const tabFavicon = document.getElementById('tabFavicon');
+    const lockIcon = document.getElementById('lockIcon');
+    const shortcuts = document.querySelectorAll('.shortcut');
+
+    let isLoading = false;
+    let progressInterval;
+    let currentUrl = '';
+
+    function processUrl(raw) {
+      let url = raw.trim();
+      if (!url) return null;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        if (url.includes('.') && !url.includes(' ')) {
+          url = 'https://' + url;
+        } else {
+          url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(url);
+        }
+      }
+      return url;
+    }
+
+    function getDomain(url) {
+      try {
+        return new URL(url).hostname.replace('www.', '');
+      } catch {
+        return url;
+      }
+    }
+
+    function animateProgress(target, duration) {
+      clearInterval(progressInterval);
+      progressBar.style.display = 'block';
+      let current = parseFloat(progressBar.style.width) || 0;
+      const step = (target - current) / (duration / 30);
+      progressInterval = setInterval(() => {
+        current = Math.min(current + step, target);
+        progressBar.style.width = current + '%';
+        if (current >= target) clearInterval(progressInterval);
+      }, 30);
+    }
+
+    function finishProgress() {
+      animateProgress(100, 300);
+      setTimeout(() => {
+        progressBar.style.display = 'none';
+        progressBar.style.width = '0%';
+      }, 400);
+    }
+
+    function setSecure(isSecure) {
+      if (isSecure) {
+        lockIcon.style.color = '#22c55e';
+        statusDot.className = 'status-dot secure';
+      } else {
+        lockIcon.style.color = 'var(--fg-muted)';
+        statusDot.className = 'status-dot';
+      }
+    }
+
+    function navigate(rawUrl) {
+      const url = processUrl(rawUrl);
+      if (!url) return;
+
+      currentUrl = url;
+      const domain = getDomain(url);
+      const isSecure = url.startsWith('https://');
+
+      // Update UI immediately
+      urlInput.value = url;
+      tabTitle.textContent = domain;
+      statusRight.textContent = url;
+      setSecure(isSecure);
+
+      // Show loader
+      welcomeScreen.style.display = 'none';
+      proxyFrame.style.display = 'none';
+      loaderOverlay.style.display = 'flex';
+      loaderText.textContent = 'Connecting to ' + domain + '...';
+
+      animateProgress(30, 400);
+
+      const proxyUrl = '/proxy/' + url;
+      proxyFrame.src = proxyUrl;
+
+      statusText.textContent = 'Loading ' + domain;
+
+      // Simulate progress
+      setTimeout(() => animateProgress(65, 500), 500);
+      setTimeout(() => animateProgress(85, 300), 1200);
+
+      proxyFrame.onload = () => {
+        loaderOverlay.style.display = 'none';
+        proxyFrame.style.display = 'block';
+        finishProgress();
+        statusText.textContent = domain;
+        try {
+          const frameTitle = proxyFrame.contentDocument && proxyFrame.contentDocument.title;
+          if (frameTitle) tabTitle.textContent = frameTitle;
+        } catch(e) {}
+      };
+
+      proxyFrame.onerror = () => {
+        loaderOverlay.style.display = 'none';
+        statusText.textContent = 'Failed to connect';
+        statusDot.style.background = '#ef4444';
+      };
+    }
+
+    // Event listeners
+    goBtn.addEventListener('click', () => navigate(urlInput.value));
+    urlInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') navigate(urlInput.value);
+    });
+    urlInput.addEventListener('focus', () => urlInput.select());
+
+    shortcuts.forEach(el => {
+      el.addEventListener('click', () => navigate(el.dataset.url));
+    });
+
+    document.getElementById('reloadBtn').addEventListener('click', () => {
+      if (currentUrl) navigate(currentUrl);
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'l') {
+        e.preventDefault();
+        urlInput.focus();
+        urlInput.select();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'r') {
+        e.preventDefault();
+        if (currentUrl) navigate(currentUrl);
+      }
+    });
+  </script>
+</body>
+</html>
